@@ -74,10 +74,6 @@ pub fn editor(file_name : &String) -> Result<()> {
     } else {
         dbg!("annotation file doesn't exists yet");
     }
-//    let f = std::fs::File::open(annotation_file).expect("Could not open file.");
-
-  //  println!("{:?}", scrape_config);
-
 
     let window = "montage-gen annotate";
     highgui::named_window(window, highgui::WINDOW_KEEPRATIO | WINDOW_GUI_EXPANDED)?;
@@ -145,7 +141,6 @@ pub fn editor(file_name : &String) -> Result<()> {
         imshow(window, &frame)?;
     }
     
-    println!("asd");
     Ok(())
 
 }
