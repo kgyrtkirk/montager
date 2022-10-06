@@ -26,9 +26,9 @@ impl OnDiskAnnotations {
 
 pub fn editor(file_name : &String) -> Result<()> { 
 
-    let mut points : Arc<Mutex<Vec<Point2i>>> = Arc::new(Mutex::new(Vec::new()));
+    let mut points = Arc::new(Mutex::new(VectorOfPoint::new()));
 
-    fn save_annotations(annotation_file : &String, points : &Vec<Point2i>) {
+    fn save_annotations(annotation_file : &String, points : &Vector<Point2i>) {
     
         let f=std::fs::File::create(annotation_file).expect("Can't open annot file for write");
         let a_points = points.iter().map(|p| (p.x,p.y)).collect();
@@ -84,32 +84,20 @@ pub fn editor(file_name : &String) -> Result<()> {
         }
         let mut frame=image.clone();
         {
-            let points2=    points.lock().unwrap();
-            let l=points2.len() as i32;
-            let s = Size::new(2,l );
-            let typ = CV_32S;
-            //let mut q = Mat::zeros_size(s, typ)?;
-            let mut q = VectorOfPoint::new();
-            // let  mut q = Mat::new_rows_cols(points2.len(), 2, CV_32SC2);
-            let mut q2 = VectorOfPoint::new();//Mat::default();
+            let points2=    points.lock().unwrap().to_owned();
+            let mut hull_points = VectorOfPoint::new();//Mat::default();
             if points2.len() > 0 {
-                // q.resize(11);
-                for p in points2.iter() {
-//                    q.push_back(Point_::new(p.x,p.y));
-                    // q2.at_2d(0,0) = 1;
-                    q.push(p.clone());
-                }
-//                let  mut hullpoints=Vec::new();
 
-                convex_hull(&q, &mut q2, true, true);
+                convex_hull(&points2, &mut hull_points, true, true);
+                
                 for i in 1..points2.len() {
                     let color = Scalar::new(255.,0.,255.,0.);
-                    imgproc::line(&mut frame, points2[i-1], points2[i], color,2 , LINE_8, 0)?;
+                    imgproc::line(&mut frame, points2.get(i-1)?, points2.get(i)?, color,2 , LINE_8, 0)?;
                 }
-                for i in 0..q2.len() {
+                for i in 0..hull_points.len() {
                     let color = Scalar::new(0.,255.,0.,0.);
-                    let j = if i>0 {i-1} else {q2.len()-1};
-                    imgproc::line(&mut frame, q2.get(j)?, q2.get(i)?, color,2 , LINE_8, 0)?;
+                    let j = if i>0 {i-1} else {hull_points.len()-1};
+                    imgproc::line(&mut frame, hull_points.get(j)?, hull_points.get(i)?, color,2 , LINE_8, 0)?;
                 }
             }
         }
