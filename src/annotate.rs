@@ -18,7 +18,7 @@ struct OnDiskAnnotations {
     points : Vec<(i32,i32)>,
 }
 
-struct Annotations {
+struct AnnotationEditor {
     points : Arc<Mutex<VectorOfPoint>>,// = Arc::new(Mutex::new(VectorOfPoint::new()));
     annotation_file: String,
     #[allow(unused)]
@@ -27,8 +27,8 @@ struct Annotations {
 }
 
 #[allow(unused)]
-impl Annotations {
-    fn new(file_name : &String) -> Annotations {
+impl AnnotationEditor {
+    fn new(file_name : &String) -> AnnotationEditor {
 
         let mut image=imgcodecs::imread(&file_name, 1).unwrap();
         // FIXME: missing image not detected
@@ -49,28 +49,23 @@ impl Annotations {
             dbg!("annotation file doesn't exists yet");
         }
 
-        Annotations {
+        AnnotationEditor {
             points: points,
             annotation_file: annotation_file,
             file_name: file_name.clone(),
             image: image,
         }
     }
-    fn save(self : &Annotations) {
-        // fn save_annotations(annotation_file : &String, points : &Vector<Point2i>) {
-    
-            let f=std::fs::File::create(&self.annotation_file).expect("Can't open annot file for write");
-            let points = self.points.lock().unwrap();
-            let a_points = points.iter().map(|p| (p.x,p.y)).collect();
-            let ann : OnDiskAnnotations = OnDiskAnnotations { points: a_points };
-    
-            serde_yaml::to_writer(f, &ann).unwrap();
-            dbg!("annot written");
-        // }
-    
-    }
+    fn save(self : &AnnotationEditor) {
+        let f=std::fs::File::create(&self.annotation_file).expect("Can't open annot file for write");
+        let points = self.points.lock().unwrap();
+        let a_points = points.iter().map(|p| (p.x,p.y)).collect();
+        let ann : OnDiskAnnotations = OnDiskAnnotations { points: a_points };
 
-    fn draw(self : &Annotations) -> Result<Mat> {
+        serde_yaml::to_writer(f, &ann).unwrap();
+        dbg!("annot written");
+    }
+    fn draw(self : &AnnotationEditor) -> Result<Mat> {
 
         let mut frame=self.image.clone();
         let points2 = self.points.lock().unwrap().to_owned();
@@ -91,7 +86,7 @@ impl Annotations {
         }
         Ok(frame)
     }
-    fn add_point(self : &Annotations, point : Point2i) {
+    fn add_point(self : &AnnotationEditor, point : Point2i) {
         self.points.lock().unwrap().push(point);
     }
 }
@@ -99,7 +94,7 @@ impl Annotations {
 
 pub fn editor(file_name : &String) -> Result<()> { 
 
-    let annotation_editor = Arc::new(Mutex::new(Annotations::new(file_name)));
+    let annotation_editor = Arc::new(Mutex::new(AnnotationEditor::new(file_name)));
     let window = "montage-gen annotate";
 
     highgui::named_window(window, highgui::WINDOW_KEEPRATIO | WINDOW_GUI_EXPANDED)?;
