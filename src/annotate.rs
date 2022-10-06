@@ -3,51 +3,26 @@ use std::sync::{Arc, Mutex};
 use opencv::{
 	highgui::{self, imshow, WINDOW_GUI_EXPANDED, EVENT_LBUTTONDOWN, resize_window},
 	prelude::*,
-	Result,imgcodecs,imgproc::{self, LINE_8, convex_hull},
+	Result,
+    imgcodecs,
+    imgproc::{self, LINE_8, convex_hull},
     core::*, types::VectorOfPoint,
-//	videoio, imgcodecs::IMREAD_ANYCOLOR,
 };
 use serde::{Deserialize, Serialize};
 use serde_yaml::{self};
 
-
 #[allow(unused)]
-
 #[derive(Debug, Serialize, Deserialize)]
-struct Annotations {
+struct OnDiskAnnotations {
     points : Vec<(i32,i32)>,
-    // points : MyPoint2i,
 }
 
-// struct MyPoint2i {
-//     point : Point2i
-// }
-
-// impl std::ops::Deref for MyPoint2i {
-//     type Target = Point2i;
-//     fn deref(&self) -> &Self::Target {
-//         &self.point
-//     }
-// }
-
-// impl Serialize for MyPoint2i {
-//     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-//         where
-//             S: serde::Serializer {
-        
-//     }
-// }
-
-
 #[allow(unused)]
-impl Annotations {
+impl OnDiskAnnotations {
     fn init(file_name : String) {
 
     }
 }
-
-
-
 
 pub fn editor(file_name : &String) -> Result<()> { 
 
@@ -57,7 +32,7 @@ pub fn editor(file_name : &String) -> Result<()> {
     
         let f=std::fs::File::create(annotation_file).expect("Can't open annot file for write");
         let a_points = points.iter().map(|p| (p.x,p.y)).collect();
-        let ann : Annotations = Annotations { points: a_points };
+        let ann : OnDiskAnnotations = OnDiskAnnotations { points: a_points };
 
         serde_yaml::to_writer(f, &ann).unwrap();
         dbg!("annot written");
@@ -67,7 +42,7 @@ pub fn editor(file_name : &String) -> Result<()> {
     annotation_file.push_str(".annot");
 
     if let Ok(f) = std::fs::File::open(&annotation_file) {
-        let data : Annotations = serde_yaml::from_reader(f).expect("Could not read values.");
+        let data : OnDiskAnnotations = serde_yaml::from_reader(f).expect("Could not read values.");
         for (x,y) in data.points {
             points.lock().unwrap().push(Point2i::new(x, y));
         }
