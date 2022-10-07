@@ -1,60 +1,106 @@
 use std::sync::{Arc, Mutex};
 
+#[allow(unused)]
 use opencv::{
     core::*,
     highgui::{self, imshow, resize_window, EVENT_LBUTTONDOWN, WINDOW_GUI_EXPANDED},
     imgcodecs,
-    imgproc::{self, convex_hull, LINE_8},
+    imgproc::{self,  INTER_LINEAR, LINE_8},
     prelude::*,
     types::VectorOfPoint,
     Result,
 };
 
+#[allow(unused)]
 struct MontageImage {
     file_name: String,
     position: Point2i,
     image: Mat,
+    image2: Mat,
 }
 
+#[allow(unused)]
 impl MontageImage {
     fn new(file_name: &String) -> MontageImage {
         let image = imgcodecs::imread(&file_name, 1).unwrap();
-        if !image.is_allocated() {
+        if image.size().unwrap().width<=0 {
             panic!("Can't open file"); // FIXME: show filename
         }
 
         MontageImage {
             file_name: file_name.clone(),
             position: Point2i::new(1, 2),
-            image: image,
+            image: image.clone(),
+            image2: image,
         }
+    }
+    fn render(&mut self) {
+        let size = self.image2.size().unwrap();
+        let m = imgproc::get_rotation_matrix_2d(Point2f::new(100.0, 100.0), 10.0, 1.0).unwrap();
+        imgproc::warp_affine(
+            &self.image,
+            &mut self.image2,
+            &m,
+            size,
+            INTER_LINEAR,
+            BORDER_CONSTANT,
+            Scalar::new(0.0, 0.0, 0.0, 0.0),
+        );
     }
 }
 
+#[allow(unused)]
 struct Montage {
     image: Mat,
     images: Vec<MontageImage>,
     size: Size2i,
 }
 
+#[allow(unused)]
 impl Montage {
     fn new(file_name: &String) -> Montage {
         let size = Size_ {
-            width: 1280,
-            height: 1024,
+            width: 600  ,
+            height: 600,
         };
         let m = MontageImage::new(&String::from("r.png"));
-        let mut image = Mat::zeros_size(size, CV_32FC3).unwrap().to_mat().unwrap();
-        let color = Scalar::new(255.,0.,255.,0.);
-        let         pt1=Point2i::new(100,100);
-        let         pt2=Point2i::new(200,50);
+        let mut image = Mat::zeros_size(size, CV_8UC3).unwrap().to_mat().unwrap();
+        let color = Scalar::new(255., 0., 255., 0.);
+        let pt1 = Point2i::new(100, 100);
+        let pt2 = Point2i::new(200, 50);
+        let pt3 = Point2i::new(300, 150);
         imgproc::line(&mut image, pt1, pt2, color, 8, LINE_8, 1);
-    let images = vec![m];
-        Montage {
+        let images = vec![(m)];
+        // let images = vec![Box::new(m)];
+        let mut m = Montage {
             image: image,
             images: images,
             size: size,
+        };
+//        Montage::render(&mut m);
+        m.render();
+        imgproc::line(&mut m.image, pt1, pt3, color, 8, LINE_8, 1);
+        m
+    }
+    fn render(&mut self) -> Result<()>{
+        for i in self.images.iter_mut() {
+            i.render();
+            let size = i.image.size().unwrap();
+            let roi = Rect {
+                x: 100,
+                y: 100,
+                width: size.width,
+                height: size.height,
+            };
+            
+            let mut dest = Mat::roi(&mut self.image, roi)?;
+            // println!("{:?}",dest);
+            // println!("{:?}",i.image);
+            i.image.copy_to(&mut dest)?;
+            // panic!("asd");
+            // self.image.re
         }
+        Ok({})
     }
 }
 
@@ -110,7 +156,7 @@ pub fn editor(file_name: &Vec<String>) -> Result<()> {
             break;
         }
         let editor = montage.lock().unwrap();
-        imshow(window, &editor.montage.image);
+        imshow(window, &editor.montage.image)?;
         // if key == 's' as i32 {
         //     annotation_editor.save();
         //     break;
