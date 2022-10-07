@@ -43,9 +43,15 @@ impl Montage {
             width: 1280,
             height: 1024,
         };
-        let images = vec![MontageImage::new(String::from("r.png"))];
+        let m = MontageImage::new(&String::from("r.png"));
+        let mut image = Mat::zeros_size(size, CV_32FC3).unwrap().to_mat().unwrap();
+        let color = Scalar::new(255.,0.,255.,0.);
+        let         pt1=Point2i::new(100,100);
+        let         pt2=Point2i::new(200,50);
+        imgproc::line(&mut image, pt1, pt2, color, 8, LINE_8, 1);
+    let images = vec![m];
         Montage {
-            image: Mat::new_size(size, typ),
+            image: image,
             images: images,
             size: size,
         }
@@ -74,7 +80,7 @@ impl MontageEditor {
 
 pub fn editor(file_name: &Vec<String>) -> Result<()> {
     let montage: Arc<Mutex<MontageEditor>> =
-        Arc::new(Mutex::new(MontageEditor::new(file_name.get(0))));
+        Arc::new(Mutex::new(MontageEditor::new(file_name.get(0).unwrap())));
 
     let window = "montage-gen montage";
 
@@ -103,7 +109,8 @@ pub fn editor(file_name: &Vec<String>) -> Result<()> {
         if key == 27 {
             break;
         }
-        // let annotation_editor = annotation_editor.lock().unwrap();
+        let editor = montage.lock().unwrap();
+        imshow(window, &editor.montage.image);
         // if key == 's' as i32 {
         //     annotation_editor.save();
         //     break;
