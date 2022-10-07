@@ -9,28 +9,54 @@ use opencv::{
     core::*, types::VectorOfPoint,
 };
 
-
 struct MontageImage {
     file_name: String,
-    image: Mat,
     position: Point2i,
-
+    image: Mat,
 }
 
-struct MontageEditor {
-    points : Arc<Mutex<VectorOfPoint>>,// = Arc::new(Mutex::new(VectorOfPoint::new()));
-    annotation_file: String,
-    #[allow(unused)]
-    file_name: String,
+impl MontageImage {
+    fn new(file_name : &String) -> MontageImage {
+        let image = imgcodecs::imread(&file_name, 1).unwrap();
+        if !image.is_allocated() {
+            panic!("Can't open file");  // FIXME: show filename
+        }
+
+        MontageImage { 
+            file_name: file_name.clone(),
+             position: Point2i::new(1,2), 
+             image: image
+        }
+    }
+}
+
+struct Montage {
     image: Mat,
+    images : Vec<MontageImage>,
+    size : Size2i,
+}
+
+impl Montage {
+    fn new(file_name : &String) -> Montage {
+        let size=Size_ { width: 1280, height: 1024 };
+        let images = vec![MontageImage::new(String::from("r.png"))];
+        Montage { image: Mat::new_size(size, typ), images: images, size:size }
+    }
     
+}
+
+
+struct MontageEditor {
+    montage : Montage,
+//    active_image : i32,
 }
 
 #[allow(unused)]
 impl MontageEditor {
-    // fn new(file_name : &String) -> MontageEditor {
-
-    // }
+    fn new(file_name : &String) -> MontageEditor {
+        let montage = Montage::new(file_name);
+        MontageEditor { montage: montage,  }
+    }
     // fn draw(self : &MontageEditor) -> Result<Mat> {
 
     //     Ok(()))
@@ -42,6 +68,8 @@ impl MontageEditor {
 
 
 pub fn editor(file_name : &Vec<String>) -> Result<()> { 
+    let montage : Arc<Mutex<MontageEditor>>=Arc::new(Mutex::new(MontageEditor::new(file_name.get(0))));
+
 
     let window = "montage-gen montage";
 
