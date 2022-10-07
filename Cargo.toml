@@ -1,3 +1,9 @@
+
+#[[bin]]
+#name = "mg_annot"
+#path = "src/main.rs"
+
+
 [package]
 name = "montage-gen"
 version = "0.1.0"

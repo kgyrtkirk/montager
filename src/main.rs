@@ -6,19 +6,37 @@ use opencv::{
 };
 
 use clap::Parser;
+use clap::*;
 mod annotate;
+mod montage;
+
+
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum,Debug)]
+enum Mode {
+	Annotate,
+	Montage,
+}
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
-   #[arg(short, long)]
-   image: String,
+	#[arg(value_enum)]
+	mode : Mode,
+	images: Vec<String>,
 }
 
 fn main() -> Result<()> {
 	let args = Args::parse();
 
- 	annotate::editor(&args.image)?;
+	match args.mode {
+		Mode::Annotate => 	for image in &args.images {
+			annotate::editor(image)?;
+		}
+		Mode::Montage => {
+			montage::editor(&args.images)?;
+		}
+	}
+
 	Ok(())
 }
 
