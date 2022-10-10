@@ -31,12 +31,15 @@ impl MontageImage {
             file_name: file_name.clone(),
             position: Point2i::new(1, 2),
             image: image.clone(),
-            image2: image,
+            image2: image.clone(),
         }
     }
-    fn render(&mut self) {
-        let size = self.image2.size().unwrap();
+    fn render(&mut self, size : Size) -> Result<()>{
+        self.image2 = Mat::zeros_size(size, CV_8UC3).unwrap().to_mat().unwrap();
+        // let size = self.image.size().unwrap();
+        // self.image2.set_rows(size.width);
         let m = imgproc::get_rotation_matrix_2d(Point2f::new(100.0, 100.0), 10.0, 1.0).unwrap();
+
         imgproc::warp_affine(
             &self.image,
             &mut self.image2,
@@ -46,6 +49,7 @@ impl MontageImage {
             BORDER_CONSTANT,
             Scalar::new(0.0, 0.0, 0.0, 0.0),
         );
+        Ok({})
     }
 }
 
@@ -83,9 +87,13 @@ impl Montage {
         m
     }
     fn render(&mut self) -> Result<()>{
+        
+        self.images.iter_mut().for_each( |m| m.render(self.size).unwrap() );
+
         for i in self.images.iter_mut() {
-            i.render();
-            let size = i.image.size().unwrap();
+            // i.render();
+            let image = &i.image2;
+            let size = image.size().unwrap();
             let roi = Rect {
                 x: 100,
                 y: 100,
@@ -94,9 +102,11 @@ impl Montage {
             };
             
             let mut dest = Mat::roi(&mut self.image, roi)?;
-            // println!("{:?}",dest);
-            // println!("{:?}",i.image);
-            i.image.copy_to(&mut dest)?;
+            println!("{:?}",dest);
+            println!("{:?}",image);
+  //           i.image2.copy_to(&mut dest)?;
+            image.copy_to(&mut self.image)?;
+            // normalize(src, dst, alpha, beta, norm_type, dtype, mask)
             // panic!("asd");
             // self.image.re
         }
@@ -155,7 +165,8 @@ pub fn editor(file_name: &Vec<String>) -> Result<()> {
         if key == 27 {
             break;
         }
-        let editor = montage.lock().unwrap();
+        let mut editor = montage.lock().unwrap();
+        editor.montage.render();
         imshow(window, &editor.montage.image)?;
         // if key == 's' as i32 {
         //     annotation_editor.save();
