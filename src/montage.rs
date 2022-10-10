@@ -99,6 +99,7 @@ impl Montage {
         let images = vec![
             MontageImage::new(&String::from("r2.png"), &Point2i::new(300, 100)),
             MontageImage::new(&String::from("r3.png"), &Point2i::new(100, 200)),
+            MontageImage::new(&String::from("r4.png"), &Point2i::new(400, 400)),
         ];
         // let images = vec![Box::new(m)];
         let mut m = Montage {
