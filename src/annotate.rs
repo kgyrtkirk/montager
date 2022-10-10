@@ -18,17 +18,17 @@ struct OnDiskAnnotations {
     points : Vec<(i32,i32)>,
 }
 
-struct AnnotationEditor {
+pub struct AnnotationEditor {
     points : Arc<Mutex<VectorOfPoint>>,// = Arc::new(Mutex::new(VectorOfPoint::new()));
     annotation_file: String,
     #[allow(unused)]
     file_name: String,
-    image: Mat,
+    pub image: Mat,
 }
 
 #[allow(unused)]
 impl AnnotationEditor {
-    fn new(file_name : &String) -> AnnotationEditor {
+    pub fn new(file_name : &String) -> AnnotationEditor {
 
         let mut image=imgcodecs::imread(&file_name, 1).unwrap();
         // FIXME: missing image not detected

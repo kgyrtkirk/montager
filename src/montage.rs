@@ -11,11 +11,14 @@ use opencv::{
     Result,
 };
 
+use crate::annotate::AnnotationEditor;
+
 #[allow(unused)]
 struct MontageImage {
-    file_name: String,
+    aimage : AnnotationEditor,
+    // file_name: String,
     position: Point2i,
-    image: Mat,
+    // image: Mat,
     image2: Mat,
 }
 
@@ -29,9 +32,8 @@ impl MontageImage {
         }
 
         MontageImage {
-            file_name: file_name.clone(),
+            aimage: AnnotationEditor::new(file_name),
             position: pos.clone(),
-            image: image.clone(),
             image2: Mat::default(),
         }
     }
@@ -44,7 +46,7 @@ impl MontageImage {
         // let size= Size ::new(500,500);
         // println!("s: {:?}", size);
         imgproc::warp_affine(
-            &self.image,
+            &self.aimage.image,
             &mut self.image2,
             &m,
             size,
@@ -107,7 +109,6 @@ impl Montage {
             images: images,
             size: size,
         };
-        //        Montage::render(&mut m);
         m.render();
         m
     }
@@ -130,29 +131,12 @@ impl Montage {
                     .map(|i| (i.dist(&p), i.sample(&p).unwrap()))
                     .collect();
 
-                let a = 0.;
-                // cmp::
-                // 1.cmp(2);
-                // 1.0.cmp
-                // float_cmp
                 dist_color.sort_by(|(d, v), (d2, v2)| d.total_cmp(d2));
 
-                // println!("{:?}",dist_color);
-
-                // for img in self.images.iter_mut() {
-
-                // }
-
-                // let q=self.image.at_2d::<Vec3b>(row-1000, col)?;
                 let a = dist_color.get(0).unwrap();
                 let b = dist_color.get(1).unwrap();
-                let q = dist_color.get(0).unwrap().1;
                 let r = (b.1*a.0 + a.1*b.0)/(a.0+b.0);
-                // Vec3f::from(b.1);
 
-                // let v3 : Vec3f =  *q.into();
-//                Vec3f::from(*q);
-                // self.image[1,2];
                 let r2=Vec3b::from([  (r[0]*255.0) as u8,(r[1]*255.0) as u8,(r[2]*255.0) as u8 ]);
                 *self.image.at_2d_mut::<Vec3b>(row, col)? = r2;
             }
@@ -162,7 +146,7 @@ impl Montage {
         if (false) {
             for i in self.images.iter_mut() {
                 // i.render();
-                let image = &i.image;
+                let image = &i.aimage.image;
                 let size = image.size().unwrap();
                 let roi = Rect {
                     x: i.position.x,
