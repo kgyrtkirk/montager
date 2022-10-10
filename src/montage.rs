@@ -35,22 +35,24 @@ impl MontageImage {
         }
     }
     fn render(&mut self, size : Size) -> Result<()>{
-        self.image2 = Mat::zeros_size(size, CV_8UC3).unwrap().to_mat().unwrap();
-        //let size = self.image.size().unwrap();
-        // self.image2.set_rows(size.width);
-        let m = imgproc::get_rotation_matrix_2d(Point2f::new(100.0, 100.0), 10.0, 1.0).unwrap();
+        // self.image2 = Mat::zeros_size(size, CV_8UC3).unwrap().to_mat().unwrap();
+        // //let size = self.image.size().unwrap();
+        // // self.image2.set_rows(size.width);
+        // let m = imgproc::get_rotation_matrix_2d(Point2f::new(50.0, 50.0), 10.0, 1.0).unwrap();
 
-        let size= Size ::new(200,200);
-        println!("s: {:?}", size);
-        imgproc::warp_affine(
-            &self.image,
-            &mut self.image2,
-            &m,
-            size,
-            INTER_LINEAR,
-            BORDER_CONSTANT,
-            Scalar::new(0.0, 0.0, 0.0, 0.0),
-        );
+        // let size= Size ::new(500,500);
+        // println!("s: {:?}", size);
+        // imgproc::warp_affine(
+        //     &self.image,
+        //     &mut self.image2,
+        //     &m,
+        //     size,
+        //     INTER_LINEAR,
+        //     BORDER_CONSTANT,
+        //     Scalar::new(0.0, 0.0, 0.0, 0.0),
+        // );
+        // println!("s: {:?}", self.image2.size());
+        self.image.copy_to(&mut self.image2);
         Ok({})
     }
 }
@@ -107,7 +109,7 @@ impl Montage {
             println!("{:?}",dest);
             println!("{:?}",image);
   //           i.image2.copy_to(&mut dest)?;
-            image.copy_to(&mut self.image)?;
+            image.copy_to(&mut dest)?;
             // normalize(src, dst, alpha, beta, norm_type, dtype, mask)
             // panic!("asd");
             // self.image.re
