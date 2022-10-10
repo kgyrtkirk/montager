@@ -153,10 +153,10 @@ impl Montage {
                 // let v3 : Vec3f =  *q.into();
 //                Vec3f::from(*q);
                 // self.image[1,2];
-                *self.image.at_2d_mut(row, col)? = r.into();
+                let r2=Vec3b::from([  (r[0]*255.0) as u8,(r[1]*255.0) as u8,(r[2]*255.0) as u8 ]);
+                *self.image.at_2d_mut::<Vec3b>(row, col)? = r2;
             }
         }
-        println!("ok");
         println!("ok");
 
         if (false) {
