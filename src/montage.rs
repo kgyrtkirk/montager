@@ -22,12 +22,13 @@ struct MontageImage {
 #[allow(unused)]
 impl MontageImage {
     fn new(file_name: &String, pos: &Point2i) -> MontageImage {
-        let image = imgcodecs::imread(&file_name, 1).unwrap();
-        // image.convert_to(m, rtype, alpha, beta)
+        let image0 = imgcodecs::imread(&file_name, 1).unwrap();
         // imgcodecs::conv
-        if image.size().unwrap().width <= 0 {
+        if image0.size().unwrap().width <= 0 {
             panic!("Can't open file"); // FIXME: show filename
         }
+        let mut image = Mat::default();
+        image0.convert_to(&mut image, f32::typ(),1.0, 0.0).unwrap();
 
         MontageImage {
             file_name: file_name.clone(),
@@ -37,7 +38,7 @@ impl MontageImage {
         }
     }
     fn render(&mut self, size: Size) -> Result<()> {
-        self.image2 = Mat::zeros_size(size, CV_8UC3).unwrap().to_mat().unwrap();
+        self.image2 = Mat::zeros_size(size, CV_32FC3).unwrap().to_mat().unwrap();
         // //let size = self.image.size().unwrap();
         // // self.image2.set_rows(size.width);
         let m = imgproc::get_rotation_matrix_2d(Point2f::new(50.0, 50.0), 10.0, 1.0).unwrap();
@@ -69,8 +70,8 @@ impl MontageImage {
         let d = (self.position - *p).norm();
         d
     }
-    fn sample(self: &MontageImage, p: &Point2i) -> Result<&Vec3b> {
-        let q = self.image2.at_2d::<Vec3b>(p.x, p.y)?;
+    fn sample(self: &MontageImage, p: &Point2i) -> Result<&Vec3f> {
+        let q = self.image2.at_2d::<Vec3f>(p.x, p.y)?;
         Ok(q)
     }
 }
@@ -89,13 +90,7 @@ impl Montage {
             width: 500,
             height: 500,
         };
-        // let m = MontageImage::new(&String::from("r.png"));
-        let mut image = Mat::zeros_size(size, CV_8UC3).unwrap().to_mat().unwrap();
-        let color = Scalar::new(255., 0., 255., 0.);
-        let pt1 = Point2i::new(100, 100);
-        let pt2 = Point2i::new(200, 50);
-        let pt3 = Point2i::new(300, 150);
-        imgproc::line(&mut image, pt1, pt2, color, 8, LINE_8, 1);
+        let mut image = Mat::zeros_size(size, CV_32FC3).unwrap().to_mat().unwrap();
         let images = vec![
             MontageImage::new(&String::from("r2.png"), &Point2i::new(300, 100)),
             MontageImage::new(&String::from("r3.png"), &Point2i::new(100, 200)),
@@ -109,7 +104,6 @@ impl Montage {
         };
         //        Montage::render(&mut m);
         m.render();
-        imgproc::line(&mut m.image, pt1, pt3, color, 8, LINE_8, 1);
         m
     }
     fn render(&mut self) -> Result<()> {
@@ -117,7 +111,7 @@ impl Montage {
             .iter_mut()
             .for_each(|m| m.render(self.size).unwrap());
 
-        self.image = Mat::new_size_with_default(self.size, CV_8UC3, Scalar::from(127))?;
+        self.image = Mat::new_size_with_default(self.size, CV_32FC3, Scalar::from(127))?;
 
         println!("ok?");
         let v0 = VecN::new(1, 2, 3, 4);
@@ -125,7 +119,7 @@ impl Montage {
         for row in 0..self.size.height {
             for col in 0..self.size.width {
                 let p: Point2i = Point_ { x: row, y: col };
-                let mut dist_color: Vec<(f64, &Vec3b)> = self
+                let mut dist_color: Vec<(f64, &Vec3f)> = self
                     .images
                     .iter()
                     .map(|i| (i.dist(&p), i.sample(&p).unwrap()))
