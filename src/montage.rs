@@ -38,7 +38,7 @@ impl MontageImage {
         self.image2 = Mat::zeros_size(size, CV_8UC3).unwrap().to_mat().unwrap();
         // let size = self.image.size().unwrap();
         // self.image2.set_rows(size.width);
-        let m = imgproc::get_rotation_matrix_2d(Point2f::new(100.0, 100.0), 10.0, 1.0).unwrap();
+        let m = imgproc::get_rotation_matrix_2d(Point2f::new(10.0, 10.0), 10.0, 1.0).unwrap();
 
         imgproc::warp_affine(
             &self.image,
