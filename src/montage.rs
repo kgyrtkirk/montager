@@ -61,17 +61,25 @@ impl MontageImage {
         self.image2 = Mat::zeros_size(size, CV_8UC3).unwrap().to_mat().unwrap();
         // //let size = self.image.size().unwrap();
         // // self.image2.set_rows(size.width);
-        let m2 = Mat::eye(2, 3, CV_64F)?;
+        // let m2 = Mat::eye(2, 3, CV_64F)?;
+        // let mut m3 = Mat2dOps::eye()?.t()?.to_mat()?;
+        // m3 = (Mat2dOps::eye()?.t()? * Mat2dOps::rot(10f64)?).into_result()?.to_mat()?;
 
-        let m = imgproc::get_rotation_matrix_2d(Point2f::new(50.0, 50.0), 10.0, 1.0).unwrap();
+        let mut m = imgproc::get_rotation_matrix_2d(Point2f::new(0.0, 0.0), 10.0, 0.2)?;
+
+        *m.at_2d_mut::<f64>(0, 2)?=self.position.x as f64;
+        *m.at_2d_mut::<f64>(1, 2)?=self.position.y as f64;
 
         // let size= Size ::new(500,500);
         println!("s: {:?}", m);
-        println!("s: {:?}", m2.to_mat()?);
+        println!("p0: {:?}", m.at_2d::<f64>(0, 2)?);
+        println!("p1: {:?}", m.at_2d::<f64>(1, 2)?);
+        // println!("s: {:?}", m2.to_mat()?);
+
         imgproc::warp_affine(
             &self.aimage.image,
             &mut self.image2,
-            &m2,
+            &m,
             size,
             INTER_LINEAR,
             BORDER_CONSTANT,
@@ -122,8 +130,8 @@ impl Montage {
         let mut image = Mat::zeros_size(size, CV_8UC3).unwrap().to_mat().unwrap();
         let images = vec![
             MontageImage::new(&String::from("r2.png"), &Point2i::new(300, 100)),
-            MontageImage::new(&String::from("r3.png"), &Point2i::new(100, 200)),
-            MontageImage::new(&String::from("r4.png"), &Point2i::new(400, 400)),
+            MontageImage::new(&String::from("r3.png"), &Point2i::new(100, 300)),
+            // MontageImage::new(&String::from("r4.png"), &Point2i::new(400, 400)),
         ];
         // let images = vec![Box::new(m)];
         let mut m = Montage {
