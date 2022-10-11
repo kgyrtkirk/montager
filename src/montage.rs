@@ -21,26 +21,6 @@ struct MontageImage {
     dist_map: Mat,
 }
 
-mod Mat2dOps {
-    use opencv::{core::*, Result};
-    pub fn eye() -> Result<Mat> {
-        Mat::eye(2, 3, CV_64F)?.to_mat()
-    }
-    pub fn rot(angle: f64) -> Result<Mat> {
-        let cos = angle.cos();
-        let sin = angle.sin();
-        let m = Mat::from_slice_2d(&[[cos, sin, 0.0], [-sin, cos, 0.0]]);
-        Ok(m?)
-    }
-    pub fn scale(s: f64) -> Result<Mat>{
-        let q : MatExprResult<MatExpr> =eye()?*s;
-        match q {
-            MatExprResult::Ok(v) => return Ok(v.to_mat()?),
-            MatExprResult::Err(e) => return Err(e),
-        };
-    }
-}
-
 #[allow(unused)]
 impl MontageImage {
     fn new(file_name: &String, pos: &Point2i) -> MontageImage {
@@ -59,22 +39,11 @@ impl MontageImage {
     }
     fn render(&mut self, size: Size) -> Result<()> {
         self.image2 = Mat::zeros_size(size, CV_8UC3).unwrap().to_mat().unwrap();
-        // //let size = self.image.size().unwrap();
-        // // self.image2.set_rows(size.width);
-        // let m2 = Mat::eye(2, 3, CV_64F)?;
-        // let mut m3 = Mat2dOps::eye()?.t()?.to_mat()?;
-        // m3 = (Mat2dOps::eye()?.t()? * Mat2dOps::rot(10f64)?).into_result()?.to_mat()?;
 
         let mut m = imgproc::get_rotation_matrix_2d(Point2f::new(0.0, 0.0), 10.0, 0.2)?;
 
         *m.at_2d_mut::<f64>(0, 2)?=self.position.x as f64;
         *m.at_2d_mut::<f64>(1, 2)?=self.position.y as f64;
-
-        // let size= Size ::new(500,500);
-        println!("s: {:?}", m);
-        println!("p0: {:?}", m.at_2d::<f64>(0, 2)?);
-        println!("p1: {:?}", m.at_2d::<f64>(1, 2)?);
-        // println!("s: {:?}", m2.to_mat()?);
 
         imgproc::warp_affine(
             &self.aimage.image,
@@ -85,14 +54,13 @@ impl MontageImage {
             BORDER_CONSTANT,
             Scalar::new(0.0, 0.0, 0.0, 0.0),
         );
-        // println!("s: {:?}", self.image2.size());
-        // self.image.copy_to(&mut self.image2);
+        
         let pt1 = Point2i::new(0, 0);
         let pt2 = self.position;
-        let pt3 = Point2i::new(300, 150);
-        let color = Scalar::new(255., 255., 255., 255.);
-        imgproc::line(&mut self.image2, pt1, pt2, color, 8, LINE_8, 1);
-        imgproc::line(&mut self.image2, pt2, pt3, color, 8, LINE_8, 1);
+        let pt3 = Point2i::new(size.width, size.height);
+        let color = Scalar::new(0., 255., 255., 255.);
+        imgproc::line(&mut self.image2, pt1, pt2, color, 8, LINE_8, 0);
+        imgproc::line(&mut self.image2, pt2, pt3, color, 8, LINE_8, 0);
 
         Ok({})
     }
@@ -129,7 +97,7 @@ impl Montage {
         };
         let mut image = Mat::zeros_size(size, CV_8UC3).unwrap().to_mat().unwrap();
         let images = vec![
-            MontageImage::new(&String::from("r2.png"), &Point2i::new(300, 100)),
+            MontageImage::new(&String::from("r2.png"), &Point2i::new(400, 100)),
             MontageImage::new(&String::from("r3.png"), &Point2i::new(100, 300)),
             // MontageImage::new(&String::from("r4.png"), &Point2i::new(400, 400)),
         ];
