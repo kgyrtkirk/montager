@@ -13,12 +13,16 @@ use opencv::{
 
 use crate::annotate::AnnotationEditor;
 
+struct RenderedMontageImage {
+    image: Mat,
+    dist_map: Mat,
+}
+
 #[allow(unused)]
 struct MontageImage {
     aimage: AnnotationEditor,
     position: Point2i,
-    image2: Mat,
-    dist_map: Mat,
+    render_cache: Option<RenderedMontageImage>,
 }
 
 #[allow(unused)]
@@ -33,36 +37,43 @@ impl MontageImage {
         MontageImage {
             aimage: AnnotationEditor::new(file_name),
             position: pos.clone(),
-            image2: Mat::default(),
-            dist_map: Mat::default(),
+            render_cache: None,
         }
     }
-    fn render(&mut self, size: Size) -> Result<()> {
-        self.image2 = Mat::zeros_size(size, CV_8UC3).unwrap().to_mat().unwrap();
+    fn update<'a>(&'a mut self, size: Size) -> Result<&'a RenderedMontageImage> {
+        if let Some(v ) = &self.render_cache {
+            return Ok(v);
+        }
+
+        let mut image = Mat::default();
 
         let mut m = imgproc::get_rotation_matrix_2d(Point2f::new(0.0, 0.0), 10.0, 0.2)?;
 
-        *m.at_2d_mut::<f64>(0, 2)?=self.position.x as f64;
-        *m.at_2d_mut::<f64>(1, 2)?=self.position.y as f64;
+        *m.at_2d_mut::<f64>(0, 2)? = self.position.x as f64;
+        *m.at_2d_mut::<f64>(1, 2)? = self.position.y as f64;
 
         imgproc::warp_affine(
             &self.aimage.image,
-            &mut self.image2,
+            &mut image,
             &m,
             size,
             INTER_LINEAR,
             BORDER_CONSTANT,
             Scalar::new(0.0, 0.0, 0.0, 0.0),
         );
-        
+
         let pt1 = Point2i::new(0, 0);
         let pt2 = self.position;
         let pt3 = Point2i::new(size.width, size.height);
         let color = Scalar::new(0., 255., 255., 255.);
-        imgproc::line(&mut self.image2, pt1, pt2, color, 8, LINE_8, 0);
-        imgproc::line(&mut self.image2, pt2, pt3, color, 8, LINE_8, 0);
+        imgproc::line(&mut image, pt1, pt2, color, 8, LINE_8, 0);
+        imgproc::line(&mut image, pt2, pt3, color, 8, LINE_8, 0);
+        self.render_cache = Some(RenderedMontageImage {
+            image: image,
+            dist_map: Mat::default(),
+        });
 
-        Ok({})
+        Ok(&self.render_cache.unwrap())
     }
 
     fn dist(self: &MontageImage, p: &Point2i) -> f64 {
@@ -70,7 +81,7 @@ impl MontageImage {
         d
     }
     fn sample(self: &MontageImage, p: &Point2i) -> Result<Vec3d> {
-        let q = self.image2.at_2d::<Vec3b>(p.x, p.y)?;
+        let q = self.render_cache.unwrap().image.at_2d::<Vec3b>(p.x, p.y)?;
         let a = q[0];
         // q[0] as f32 ,q[1] as f32,q[2] as f32
         let r = Vec3d::from([q[0] as f64, q[1] as f64, q[2] as f64]) / 255.;
@@ -113,7 +124,7 @@ impl Montage {
     fn render(&mut self) -> Result<()> {
         self.images
             .iter_mut()
-            .for_each(|m| m.render(self.size).unwrap());
+            .for_each(|m| {m.update(self.size).unwrap();});
 
         self.image = Mat::new_size_with_default(self.size, CV_8UC3, Scalar::from(127))?;
 
