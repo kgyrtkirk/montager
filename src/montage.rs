@@ -1,5 +1,6 @@
 use std::sync::{Arc, Mutex};
 
+use opencv::highgui::{EVENT_MOUSEMOVE, EVENT_LBUTTONUP};
 #[allow(unused)]
 use opencv::{
     core::*,
@@ -189,8 +190,27 @@ impl Montage {
     }
 }
 
+
+struct MoveModification {
+    downPos : Point2i,
+    currPos : Point2i,
+    image_idx: i32,
+}
+
+pub trait Modification {
+    fn apply(&mut self,pos : Point2i, montage : &mut Montage);
+}
+
+impl Modification for MoveModification {
+    fn apply(&mut self,pos : Point2i, montage : &mut Montage) {
+        
+    }
+}
+
 struct MontageEditor {
     montage: Montage,
+    // FIXME: figure out what +Send means
+    modState: Option<Box<dyn Modification + Send>>,
     //    active_image : i32,
 }
 
@@ -198,7 +218,10 @@ struct MontageEditor {
 impl MontageEditor {
     fn new(file_name: &String) -> MontageEditor {
         let montage = Montage::new(file_name);
-        MontageEditor { montage: montage }
+        MontageEditor {
+            montage: montage,
+            modState: None,
+        }
     }
     // fn draw(self : &MontageEditor) -> Result<Mat> {
 
@@ -220,13 +243,31 @@ pub fn editor(file_name: &Vec<String>) -> Result<()> {
     highgui::set_mouse_callback(
         window,
         Some(Box::new({
-            //    let annotation_editor = Arc::clone(&annotation_editor);
+        let montage = Arc::clone(&montage);
             move |event, x, y, _flags| {
-                println!(" {} {} ", x, y);
+                let p = Point2i::new(x,y);
+                // println!(" {} {} ", x, y);
+
+                let mut  montage =montage.lock().unwrap();
                 match event {
+                    EVENT_MOUSEMOVE => {
+                        println!("M {:?} ",p);
+                        // let ms=montage.modState;
+                        // if let Some(m) = ms.as_mut() {
+                        //     m.apply(p,&mut montage.montage);
+                        // }
+                    }
                     EVENT_LBUTTONDOWN => {
-                        println!(" {} {} ", x, y);
-                        // annotation_editor.lock().unwrap().add_point(Point2i::new(x,y));
+                        let idx=0;
+                        // let img = montage.montage.images.get(0);
+                        montage.modState=Some(Box::new(MoveModification {downPos:p,currPos:p,image_idx:0}));
+                        println!("LB {} {} ", x, y);
+                    }
+                    EVENT_LBUTTONUP => {
+                        // if let Some(m) = montage.modState.as_mut() {
+                        //     m.apply(p,&mut montage.montage);
+                        // }
+                        // montage.modState=None;
                     }
                     _ => {}
                 }
