@@ -198,11 +198,11 @@ struct MoveModification {
 }
 
 pub trait Modification {
-    fn apply(&mut self,pos : Point2i, montage : &mut Montage);
+    fn apply(&self,pos : Point2i, montage : &mut Montage);
 }
 
 impl Modification for MoveModification {
-    fn apply(&mut self,pos : Point2i, montage : &mut Montage) {
+    fn apply(&self,pos : Point2i, montage : &mut Montage) {
         
     }
 }
@@ -244,11 +244,11 @@ pub fn editor(file_name: &Vec<String>) -> Result<()> {
         window,
         Some(Box::new({
         let montage = Arc::clone(&montage);
+        let modification : Option<Arc<Mutex<dyn Modification + Send>>> = None;
             move |event, x, y, _flags| {
                 let p = Point2i::new(x,y);
                 // println!(" {} {} ", x, y);
 
-                let mut  montage =montage.lock().unwrap();
                 match event {
                     EVENT_MOUSEMOVE => {
                         println!("M {:?} ",p);
@@ -256,16 +256,31 @@ pub fn editor(file_name: &Vec<String>) -> Result<()> {
                         // if let Some(m) = ms.as_mut() {
                         //     m.apply(p,&mut montage.montage);
                         // }
+                        if let Some(m) = &modification {
+                            let mut  montage =montage.lock().unwrap();
+                            // let mm = &mut montage.montage;
+                            m.lock().unwrap().apply(p, &mut montage.montage);
+                        }
                     }
                     EVENT_LBUTTONDOWN => {
+                        let mut  montage =montage.lock().unwrap();
                         let idx=0;
-                        // let img = montage.montage.images.get(0);
-                        montage.modState=Some(Box::new(MoveModification {downPos:p,currPos:p,image_idx:0}));
+                        montage.modState=Some(Box::new(MoveModification {downPos:p,currPos:p,image_idx:idx}));
                         println!("LB {} {} ", x, y);
                     }
                     EVENT_LBUTTONUP => {
-                        // if let Some(m) = montage.modState.as_mut() {
-                        //     m.apply(p,&mut montage.montage);
+                        // let mo = montage.modState.take();
+                        if let Some(m) = &modification {
+                            let mut  montage =montage.lock().unwrap();
+                            // let mm = &mut montage.montage;
+                            m.lock().unwrap().apply(p, &mut montage.montage);
+                        }
+                        // montage.modState= mo.clone();
+
+
+                        // if let Some(m) = mo {
+                        //     // let mut q=&montage.montage;
+                        //     m.apply(p,mm);
                         // }
                         // montage.modState=None;
                     }
