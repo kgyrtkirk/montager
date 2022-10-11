@@ -40,9 +40,9 @@ impl MontageImage {
             render_cache: None,
         }
     }
-    fn update<'a>(&'a mut self, size: Size) -> Result<&'a RenderedMontageImage> {
-        if let Some(v ) = &self.render_cache {
-            return Ok(v);
+    fn update(&mut self, size: Size) -> Result<()> {
+        if self.render_cache.is_some() {
+            return Ok({});
         }
 
         let mut image = Mat::default();
@@ -73,7 +73,7 @@ impl MontageImage {
             dist_map: Mat::default(),
         });
 
-        Ok(&self.render_cache.unwrap())
+        Ok({})
     }
 
     fn dist(self: &MontageImage, p: &Point2i) -> f64 {
@@ -81,7 +81,7 @@ impl MontageImage {
         d
     }
     fn sample(self: &MontageImage, p: &Point2i) -> Result<Vec3d> {
-        let q = self.render_cache.unwrap().image.at_2d::<Vec3b>(p.x, p.y)?;
+        let q = self.render_cache.as_ref().unwrap().image.at_2d::<Vec3b>(p.x, p.y)?;
         let a = q[0];
         // q[0] as f32 ,q[1] as f32,q[2] as f32
         let r = Vec3d::from([q[0] as f64, q[1] as f64, q[2] as f64]) / 255.;
@@ -94,7 +94,7 @@ impl MontageImage {
 
 #[allow(unused)]
 struct Montage {
-    image: Mat,
+    image1: Option<Mat>,
     images: Vec<MontageImage>,
     size: Size2i,
 }
@@ -114,7 +114,7 @@ impl Montage {
         ];
         // let images = vec![Box::new(m)];
         let mut m = Montage {
-            image: image,
+            image1: None,
             images: images,
             size: size,
         };
@@ -122,11 +122,16 @@ impl Montage {
         m
     }
     fn render(&mut self) -> Result<()> {
+        
+        if self.image1.is_some() {
+            return Ok({});
+        }
+
         self.images
             .iter_mut()
-            .for_each(|m| {m.update(self.size).unwrap();});
+            .for_each(|m| m.update(self.size).unwrap());
 
-        self.image = Mat::new_size_with_default(self.size, CV_8UC3, Scalar::from(127))?;
+        let mut selfimage = Mat::new_size_with_default(self.size, CV_8UC3, Scalar::from(127))?;
 
         println!("ok?");
         let v0 = VecN::new(1, 2, 3, 4);
@@ -151,7 +156,7 @@ impl Montage {
                     (r[1] * 255.0) as u8,
                     (r[2] * 255.0) as u8,
                 ]);
-                *self.image.at_2d_mut::<Vec3b>(row, col)? = r2;
+                *selfimage.at_2d_mut::<Vec3b>(row, col)? = r2;
             }
         }
         println!("ok");
@@ -168,7 +173,7 @@ impl Montage {
                     height: size.height,
                 };
 
-                let mut dest = Mat::roi(&mut self.image, roi)?;
+                let mut dest = Mat::roi(&mut selfimage, roi)?;
                 println!("{:?}", dest);
                 println!("{:?}", image);
                 //           i.image2.copy_to(&mut dest)?;
@@ -178,6 +183,7 @@ impl Montage {
                 // self.image.re
             }
         }
+        self.image1=Some(selfimage);
 
         Ok({})
     }
@@ -230,13 +236,13 @@ pub fn editor(file_name: &Vec<String>) -> Result<()> {
 
     resize_window(window, 500, 500)?;
     loop {
-        let key = highgui::wait_key(100)?;
+        let key = highgui::wait_key(10)?;
         if key == 27 {
             break;
         }
         let mut editor = montage.lock().unwrap();
         editor.montage.render()?;
-        imshow(window, &editor.montage.image)?;
+        imshow(window, &editor.montage.image1.as_ref().unwrap())?;
         //        imshow(window, &editor.montage.images.get(0).unwrap().image2)?;
         //        imshow(window, &editor.montage.image)?;
         // if key == 's' as i32 {
