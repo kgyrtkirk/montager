@@ -15,11 +15,30 @@ use crate::annotate::AnnotationEditor;
 
 #[allow(unused)]
 struct MontageImage {
-    aimage : AnnotationEditor,
-    // file_name: String,
+    aimage: AnnotationEditor,
     position: Point2i,
-    // image: Mat,
     image2: Mat,
+    dist_map: Mat,
+}
+
+mod Mat2dOps {
+    use opencv::{core::*, Result};
+    pub fn eye() -> Result<Mat> {
+        Mat::eye(2, 3, CV_64F)?.to_mat()
+    }
+    pub fn rot(angle: f64) -> Result<Mat> {
+        let cos = angle.cos();
+        let sin = angle.sin();
+        let m = Mat::from_slice_2d(&[[cos, sin, 0.0], [-sin, cos, 0.0]]);
+        Ok(m?)
+    }
+    pub fn scale(s: f64) -> Result<Mat>{
+        let q : MatExprResult<MatExpr> =eye()?*s;
+        match q {
+            MatExprResult::Ok(v) => return Ok(v.to_mat()?),
+            MatExprResult::Err(e) => return Err(e),
+        };
+    }
 }
 
 #[allow(unused)]
@@ -35,20 +54,24 @@ impl MontageImage {
             aimage: AnnotationEditor::new(file_name),
             position: pos.clone(),
             image2: Mat::default(),
+            dist_map: Mat::default(),
         }
     }
     fn render(&mut self, size: Size) -> Result<()> {
         self.image2 = Mat::zeros_size(size, CV_8UC3).unwrap().to_mat().unwrap();
         // //let size = self.image.size().unwrap();
         // // self.image2.set_rows(size.width);
+        let m2 = Mat::eye(2, 3, CV_64F)?;
+
         let m = imgproc::get_rotation_matrix_2d(Point2f::new(50.0, 50.0), 10.0, 1.0).unwrap();
 
         // let size= Size ::new(500,500);
-        // println!("s: {:?}", size);
+        println!("s: {:?}", m);
+        println!("s: {:?}", m2.to_mat()?);
         imgproc::warp_affine(
             &self.aimage.image,
             &mut self.image2,
-            &m,
+            &m2,
             size,
             INTER_LINEAR,
             BORDER_CONSTANT,
@@ -63,7 +86,6 @@ impl MontageImage {
         imgproc::line(&mut self.image2, pt1, pt2, color, 8, LINE_8, 1);
         imgproc::line(&mut self.image2, pt2, pt3, color, 8, LINE_8, 1);
 
-
         Ok({})
     }
 
@@ -73,9 +95,9 @@ impl MontageImage {
     }
     fn sample(self: &MontageImage, p: &Point2i) -> Result<Vec3d> {
         let q = self.image2.at_2d::<Vec3b>(p.x, p.y)?;
-        let a=q[0];
+        let a = q[0];
         // q[0] as f32 ,q[1] as f32,q[2] as f32
-        let r=Vec3d::from([ q[0] as f64 ,q[1] as f64,q[2] as f64])/255.;
+        let r = Vec3d::from([q[0] as f64, q[1] as f64, q[2] as f64]) / 255.;
         // let r=Point3d::new(1.,1.,1.);
         // let r=Point3f::new(q[0] as f32 ,q[1] as f32,q[2] as f32);
         // Ok(q.clone())
@@ -135,9 +157,13 @@ impl Montage {
 
                 let a = dist_color.get(0).unwrap();
                 let b = dist_color.get(1).unwrap();
-                let r = (b.1*a.0 + a.1*b.0)/(a.0+b.0);
+                let r = (b.1 * a.0 + a.1 * b.0) / (a.0 + b.0);
 
-                let r2=Vec3b::from([  (r[0]*255.0) as u8,(r[1]*255.0) as u8,(r[2]*255.0) as u8 ]);
+                let r2 = Vec3b::from([
+                    (r[0] * 255.0) as u8,
+                    (r[1] * 255.0) as u8,
+                    (r[2] * 255.0) as u8,
+                ]);
                 *self.image.at_2d_mut::<Vec3b>(row, col)? = r2;
             }
         }
