@@ -1,6 +1,6 @@
 use std::sync::{Arc, Mutex};
 
-use opencv::highgui::{EVENT_MOUSEMOVE, EVENT_LBUTTONUP};
+use opencv::highgui::{EVENT_LBUTTONUP, EVENT_MOUSEMOVE};
 #[allow(unused)]
 use opencv::{
     core::*,
@@ -40,6 +40,9 @@ impl MontageImage {
             position: pos.clone(),
             render_cache: None,
         }
+    }
+    fn move1(&mut self, p : &Point2i) {
+
     }
     fn update(&mut self, size: Size) -> Result<()> {
         if self.render_cache.is_some() {
@@ -82,7 +85,12 @@ impl MontageImage {
         d
     }
     fn sample(self: &MontageImage, p: &Point2i) -> Result<Vec3d> {
-        let q = self.render_cache.as_ref().unwrap().image.at_2d::<Vec3b>(p.x, p.y)?;
+        let q = self
+            .render_cache
+            .as_ref()
+            .unwrap()
+            .image
+            .at_2d::<Vec3b>(p.x, p.y)?;
         let a = q[0];
         // q[0] as f32 ,q[1] as f32,q[2] as f32
         let r = Vec3d::from([q[0] as f64, q[1] as f64, q[2] as f64]) / 255.;
@@ -113,6 +121,9 @@ impl Montage {
             MontageImage::new(&String::from("r3.png"), &Point2i::new(100, 300)),
             // MontageImage::new(&String::from("r4.png"), &Point2i::new(400, 400)),
         ];
+        let mut p =images.get(0).unwrap();
+        let mut p =images.get(0).unwrap().position;
+
         // let images = vec![Box::new(m)];
         let mut m = Montage {
             image1: None,
@@ -123,7 +134,6 @@ impl Montage {
         m
     }
     fn render(&mut self) -> Result<()> {
-        
         if self.image1.is_some() {
             return Ok({});
         }
@@ -184,26 +194,31 @@ impl Montage {
                 // self.image.re
             }
         }
-        self.image1=Some(selfimage);
+        self.image1 = Some(selfimage);
 
         Ok({})
     }
 }
 
-
 struct MoveModification {
-    downPos : Point2i,
-    currPos : Point2i,
+    downPos: Point2i,
+    currPos: Point2i,
     image_idx: i32,
 }
 
 pub trait Modification {
-    fn apply(&self,pos : Point2i, montage : &mut Montage);
+    fn apply(&mut self, pos: Point2i, montage: &mut Montage);
 }
 
 impl Modification for MoveModification {
-    fn apply(&self,pos : Point2i, montage : &mut Montage) {
-        
+    fn apply(&mut self, pos: Point2i, montage: &mut Montage) {
+        // let mut k = montage;
+        let mut i=(montage.images).get(0);
+        let img = i.as_mut().unwrap();
+            img.move1(&pos);
+        // img.position.x=1;
+
+        self.downPos = pos.clone();
     }
 }
 
@@ -243,40 +258,46 @@ pub fn editor(file_name: &Vec<String>) -> Result<()> {
     highgui::set_mouse_callback(
         window,
         Some(Box::new({
-        let montage = Arc::clone(&montage);
-        let modification : Option<Arc<Mutex<dyn Modification + Send>>> = None;
+            let mut montage = Arc::clone(&montage);
+            let mut modification: Option<Arc<Mutex<dyn Modification + Send>>> = None;
             move |event, x, y, _flags| {
-                let p = Point2i::new(x,y);
+                let p = Point2i::new(x, y);
                 // println!(" {} {} ", x, y);
 
                 match event {
                     EVENT_MOUSEMOVE => {
-                        println!("M {:?} ",p);
+                        println!("M {:?} ", p);
                         // let ms=montage.modState;
                         // if let Some(m) = ms.as_mut() {
                         //     m.apply(p,&mut montage.montage);
                         // }
-                        if let Some(m) = &modification {
-                            let mut  montage =montage.lock().unwrap();
-                            // let mm = &mut montage.montage;
-                            m.lock().unwrap().apply(p, &mut montage.montage);
-                        }
+                        // if let Some(m) = &modification {
+                        //     let mut montage = montage.lock().unwrap();
+                        //     // let mm = &mut montage.montage;
+                        //     m.lock().unwrap().apply(p, &mut montage.montage);
+                        // }
                     }
                     EVENT_LBUTTONDOWN => {
-                        let mut  montage =montage.lock().unwrap();
-                        let idx=0;
-                        montage.modState=Some(Box::new(MoveModification {downPos:p,currPos:p,image_idx:idx}));
+                        // let mut  montage =montage.lock().unwrap();
+                        let idx = 0;
+                        modification = Some(Arc::new(Mutex::new(MoveModification {
+                            downPos: p,
+                            currPos: p,
+                            image_idx: idx,
+                        })));
                         println!("LB {} {} ", x, y);
                     }
                     EVENT_LBUTTONUP => {
                         // let mo = montage.modState.take();
                         if let Some(m) = &modification {
-                            let mut  montage =montage.lock().unwrap();
+                            let mut locked=montage.lock();
+                            let  mutt =locked.as_mut();
+                            let mut montage = mutt.unwrap();
                             // let mm = &mut montage.montage;
-                            m.lock().unwrap().apply(p, &mut montage.montage);
+                            // m.lock().unwrap().apply(p, &mut montage.montage);
+                            montage.montage.images.get(0).unwrap().move1(&Point2i::new(1, 2));
                         }
                         // montage.modState= mo.clone();
-
 
                         // if let Some(m) = mo {
                         //     // let mut q=&montage.montage;
