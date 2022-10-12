@@ -205,15 +205,15 @@ struct MoveModification {
 }
 
 pub trait Modification {
-    fn apply(&mut self, pos: &Point2i, montage: &mut MontageEditor);
+    fn apply(&mut self, pos: &Point2i, montage: &mut Montage);
 }
 
 impl Modification for MoveModification {
-    fn apply(&mut self, pos: &Point2i, montage: &mut MontageEditor) {
+    fn apply(&mut self, pos: &Point2i, montage: &mut Montage) {
         // // let mut k = montage;
-        // let mut i=(montage.images).get(0);
-        // let img = i.as_mut().unwrap();
-        //     img.move1(&pos);
+        let mut i=(montage.images).get(0);
+        let mut img = i.as_mut().unwrap();
+        img.move1(&pos);
         // // img.position.x=1;
 
         // self.downPos = pos.clone();
@@ -259,8 +259,8 @@ impl MontageEditor {
     //     self.points.lock().unwrap().push(point);
     // }
     fn mouse_event(&mut self, event: MouseEvent, pos: &Point2i) {
-        if let Some(m) = &self.modState {
-            // m.as_mut().apply(pos, self)
+        if let Some(m) = self.modState.as_mut() {
+            m.as_mut().apply(pos, &mut self.montage);
         }
 
         match (event) {
