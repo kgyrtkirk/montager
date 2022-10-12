@@ -19,7 +19,7 @@ struct OnDiskAnnotations {
 }
 
 pub struct AnnotationEditor {
-    points: Arc<Mutex<VectorOfPoint>>, // = Arc::new(Mutex::new(VectorOfPoint::new()));
+    points: VectorOfPoint, // = Arc::new(Mutex::new(VectorOfPoint::new()));
     annotation_file: String,
     #[allow(unused)]
     file_name: String,
@@ -34,7 +34,7 @@ impl AnnotationEditor {
 
         println!("asd {}", image.size().unwrap().width);
 
-        let mut points = Arc::new(Mutex::new(VectorOfPoint::new()));
+        let mut points = VectorOfPoint::new();
 
         let mut annotation_file = file_name.clone();
         annotation_file.push_str(".annot");
@@ -43,7 +43,7 @@ impl AnnotationEditor {
             let data: OnDiskAnnotations =
                 serde_yaml::from_reader(f).expect("Could not read values.");
             for (x, y) in data.points {
-                points.lock().unwrap().push(Point2i::new(x, y));
+                points.push(Point2i::new(x, y));
             }
         } else {
             dbg!("annotation file doesn't exists yet");
@@ -59,8 +59,7 @@ impl AnnotationEditor {
     fn save(self: &AnnotationEditor) {
         let f =
             std::fs::File::create(&self.annotation_file).expect("Can't open annot file for write");
-        let points = self.points.lock().unwrap();
-        let a_points = points.iter().map(|p| (p.x, p.y)).collect();
+        let a_points = self.points.iter().map(|p| (p.x, p.y)).collect();
         let ann: OnDiskAnnotations = OnDiskAnnotations { points: a_points };
 
         serde_yaml::to_writer(f, &ann).unwrap();
@@ -68,7 +67,7 @@ impl AnnotationEditor {
     }
     fn draw(self: &AnnotationEditor) -> Result<Mat> {
         let mut frame = self.image.clone();
-        let points2 = self.points.lock().unwrap().to_owned();
+        let points2 = &self.points;
         let mut hull_points = VectorOfPoint::new(); //Mat::default();
         if points2.len() > 0 {
             convex_hull(&points2, &mut hull_points, true, true);
@@ -101,8 +100,8 @@ impl AnnotationEditor {
         }
         Ok(frame)
     }
-    fn add_point(self: &AnnotationEditor, point: Point2i) {
-        self.points.lock().unwrap().push(point);
+    fn add_point(self: &mut AnnotationEditor, point: Point2i) {
+        self.points.push(point);
     }
 
     pub(crate) fn make_dist_map(&self, m: Mat, size: Size_<i32>, pos: Point_<i32>) -> Mat {
