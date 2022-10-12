@@ -41,7 +41,10 @@ impl MontageImage {
             render_cache: None,
         }
     }
-    fn move1(&mut self, p: &Point2i) {}
+    fn move1(&mut self, p: &Point2i) {
+        self.position=p.clone();
+
+    }
     fn update(&mut self, size: Size) -> Result<()> {
         if self.render_cache.is_some() {
             return Ok({});
@@ -212,8 +215,8 @@ impl Modification for MoveModification {
     fn apply(&mut self, pos: &Point2i, montage: &mut Montage) {
         // // let mut k = montage;
         let mut i=(montage.images).get(0);
-        let mut img = i.as_mut().unwrap();
-        img.move1(&pos);
+        // let mut img = i.as_mut().unwrap();
+        i.as_mut().unwrap().move1(&pos);
         // // img.position.x=1;
 
         // self.downPos = pos.clone();
