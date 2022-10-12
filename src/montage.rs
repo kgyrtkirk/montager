@@ -1,6 +1,4 @@
-use std::{
-    sync::{Arc, Mutex},
-};
+use std::sync::{Arc, Mutex};
 
 use opencv::highgui::{EVENT_LBUTTONUP, EVENT_MOUSEMOVE};
 #[allow(unused)]
@@ -33,7 +31,7 @@ struct MontageImage {
 impl MontageImage {
     fn new(file_name: &String, pos: &Point2i) -> MontageImage {
         let image = imgcodecs::imread(&file_name, 1).unwrap();
-        
+
         if image.size().unwrap().width <= 0 {
             panic!("Can't open file"); // FIXME: show filename
         }
@@ -59,6 +57,8 @@ impl MontageImage {
 
         *m.at_2d_mut::<f64>(0, 2)? = self.position.x as f64;
         *m.at_2d_mut::<f64>(1, 2)? = self.position.y as f64;
+
+        println!("{:?}",self.position);
 
         imgproc::warp_affine(
             &self.aimage.image,
@@ -94,7 +94,7 @@ impl MontageImage {
             .as_ref()
             .unwrap()
             .image
-            .at_2d::<Vec3b>(p.x, p.y)?;
+            .at_2d::<Vec3b>(p.y, p.x)?;
         let a = q[0];
         // q[0] as f32 ,q[1] as f32,q[2] as f32
         let r = Vec3d::from([q[0] as f64, q[1] as f64, q[2] as f64]) / 255.;
@@ -122,7 +122,7 @@ impl Montage {
         let images = vec![
             MontageImage::new(&String::from("r2.png"), &Point2i::new(400, 100)),
             MontageImage::new(&String::from("r3.png"), &Point2i::new(100, 300)),
-            // MontageImage::new(&String::from("r4.png"), &Point2i::new(400, 400)),
+            MontageImage::new(&String::from("r4.png"), &Point2i::new(400, 400)),
         ];
 
         // let images = vec![Box::new(m)];
@@ -151,22 +151,24 @@ impl Montage {
 
         let mut selfimage = Mat::new_size_with_default(self.size, CV_8UC3, Scalar::from(127))?;
 
-        println!("ok?");
         let v0 = VecN::new(1, 2, 3, 4);
         let v = Vec3b::from([255, 0, 255]);
         for row in 0..self.size.height {
             for col in 0..self.size.width {
-                let p: Point2i = Point_ { x: row, y: col };
+                let p: Point2i = Point_ { x: col, y: row };
                 let mut dist_color: Vec<(f64, Vec3d)> = self
                     .images
                     .iter()
                     .map(|i| (i.dist(&p), i.sample(&p).unwrap()))
                     .collect();
 
-                dist_color.sort_by(|(d, v), (d2, v2)| d.total_cmp(d2));
+                 dist_color.sort_by(|(d, v), (d2, v2)| d.total_cmp(d2));
 
                 let a = dist_color.get(0).unwrap();
                 let b = dist_color.get(1).unwrap();
+
+                // let r = if a.0 < 100.0 { a.1 } else { b.1 };//* a.0);// + a.1 * b.0) / (a.0 + b.0+1.0);
+                // let r = (b.1 * a.0 + a.1 * b.0) / (a.0 + b.0+1.0);
                 let r = (b.1 * a.0 + a.1 * b.0) / (a.0 + b.0);
 
                 let r2 = Vec3b::from([
@@ -177,30 +179,7 @@ impl Montage {
                 *selfimage.at_2d_mut::<Vec3b>(row, col)? = r2;
             }
         }
-        println!("ok");
 
-        if (false) {
-            for i in self.images.iter_mut() {
-                // i.render();
-                let image = &i.aimage.image;
-                let size = image.size().unwrap();
-                let roi = Rect {
-                    x: i.position.x,
-                    y: i.position.y,
-                    width: size.width,
-                    height: size.height,
-                };
-
-                let mut dest = Mat::roi(&mut selfimage, roi)?;
-                println!("{:?}", dest);
-                println!("{:?}", image);
-                //           i.image2.copy_to(&mut dest)?;
-                image.copy_to(&mut dest)?;
-                // normalize(src, dst, alpha, beta, norm_type, dtype, mask)
-                // panic!("asd");
-                // self.image.re
-            }
-        }
         self.render_buffer = Some(selfimage);
 
         Ok({})
@@ -222,7 +201,7 @@ impl Modification for MoveModification {
         if delta.norm() > 0. {
             let img = (montage.images).get_mut(self.image_idx).unwrap();
             img.move1(&delta);
-            self.last_pos=*pos;
+            self.last_pos = *pos;
         }
     }
 }
@@ -307,14 +286,6 @@ pub fn editor(file_name: &Vec<String>) -> Result<()> {
         let mut editor = montage_editor.lock().unwrap();
         editor.montage.render()?;
         imshow(window, &editor.montage.render_buffer.as_ref().unwrap())?;
-        //        imshow(window, &editor.montage.images.get(0).unwrap().image2)?;
-        //        imshow(window, &editor.montage.image)?;
-        // if key == 's' as i32 {
-        //     annotation_editor.save();
-        //     break;
-        // }
-        // let frame=annotation_editor.draw()?;
-        // imshow(window, &frame)?;
     }
     Ok(())
 }
