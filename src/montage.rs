@@ -42,12 +42,12 @@ impl MontageImage {
         }
     }
     fn move1(&mut self, p: &Point2i) {
-        self.position=p.clone();
-
+        self.position = *p;
+        self.render_cache = None;
     }
-    fn update(&mut self, size: Size) -> Result<()> {
+    fn update(&mut self, size: Size) -> Result<Option<()>> {
         if self.render_cache.is_some() {
-            return Ok({});
+            return Ok(None);
         }
 
         let mut image = Mat::default();
@@ -78,7 +78,7 @@ impl MontageImage {
             dist_map: Mat::default(),
         });
 
-        Ok({})
+        Ok(Some({}))
     }
 
     fn dist(self: &MontageImage, p: &Point2i) -> f64 {
@@ -135,13 +135,19 @@ impl Montage {
         m
     }
     fn render(&mut self) -> Result<()> {
+        let mut changes = false;
+        // how about an event instead? 
+        let mod_count: i32 = self
+            .images
+            .iter_mut()
+            .map(|m| m.update(self.size).unwrap().is_some() as i32)
+            .sum();
+        if mod_count > 0 {
+            self.image1 = None;
+        }
         if self.image1.is_some() {
             return Ok({});
         }
-
-        self.images
-            .iter_mut()
-            .for_each(|m| m.update(self.size).unwrap());
 
         let mut selfimage = Mat::new_size_with_default(self.size, CV_8UC3, Scalar::from(127))?;
 
@@ -203,8 +209,7 @@ impl Montage {
 
 struct MoveModification {
     downPos: Point2i,
-    currPos: Point2i,
-    image_idx: i32,
+    image_idx: usize,
 }
 
 pub trait Modification {
@@ -214,9 +219,9 @@ pub trait Modification {
 impl Modification for MoveModification {
     fn apply(&mut self, pos: &Point2i, montage: &mut Montage) {
         // // let mut k = montage;
-        let mut i=(montage.images).get(0);
+        let mut i = (montage.images).get_mut(self.image_idx);
         // let mut img = i.as_mut().unwrap();
-        i.as_mut().unwrap().move1(&pos);
+        i.unwrap().move1(&pos);
         // // img.position.x=1;
 
         // self.downPos = pos.clone();
@@ -254,22 +259,20 @@ impl MontageEditor {
             modState: None,
         }
     }
-    // fn draw(self : &MontageEditor) -> Result<Mat> {
-
-    //     Ok(()))
-    // }
-    // fn add_point(self : &MontageEditor, point : Point2i) {
-    //     self.points.lock().unwrap().push(point);
-    // }
     fn mouse_event(&mut self, event: MouseEvent, pos: &Point2i) {
         if let Some(m) = self.modState.as_mut() {
             m.as_mut().apply(pos, &mut self.montage);
         }
 
         match (event) {
-            MouseEvent::Move => todo!(),
-            MouseEvent::LButtonDown => todo!(),
-            MouseEvent::LButtonUp => todo!(),
+            MouseEvent::Move => {}
+            MouseEvent::LButtonDown => {
+                self.modState = Some(Box::new(MoveModification {
+                    downPos: *pos,
+                    image_idx: 0,
+                }))
+            }
+            MouseEvent::LButtonUp => self.modState = None,
         }
     }
 }
@@ -289,7 +292,6 @@ pub fn editor(file_name: &Vec<String>) -> Result<()> {
             let mut modification: Option<Arc<Mutex<dyn Modification + Send>>> = None;
             move |event, x, y, _flags| {
                 let p = Point2i::new(x, y);
-                // println!(" {} {} ", x, y);
                 let mut montage_editor = montage_editor.lock().unwrap();
 
                 match event {
