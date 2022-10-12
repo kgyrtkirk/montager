@@ -226,6 +226,7 @@ impl Modification for MoveModification {
         if delta.norm() > 0. {
             let mut img = (montage.images).get_mut(self.image_idx).unwrap();
             img.move1(&delta);
+            self.last_pos=*pos;
         }
     }
 }
