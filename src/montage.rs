@@ -51,15 +51,11 @@ impl MontageImage {
             return Ok(None);
         }
 
-        let mut image = Mat::default();
-
-        let mut m = imgproc::get_rotation_matrix_2d(Point2f::new(0.0, 0.0), 10.0, 0.2)?;
-
+        let mut m = imgproc::get_rotation_matrix_2d(Point2f::new(0.0, 0.0), -10.0, 0.5)?;
         *m.at_2d_mut::<f64>(0, 2)? = self.position.x as f64;
         *m.at_2d_mut::<f64>(1, 2)? = self.position.y as f64;
 
-        println!("{:?}",self.position);
-
+        let mut image = Mat::default();
         imgproc::warp_affine(
             &self.aimage.image,
             &mut image,
@@ -69,16 +65,21 @@ impl MontageImage {
             BORDER_CONSTANT,
             Scalar::new(0.0, 0.0, 0.0, 0.0),
         );
-
         let pt1 = Point2i::new(0, 0);
         let pt2 = self.position;
         let pt3 = Point2i::new(size.width, size.height);
         let color = Scalar::new(0., 255., 255., 255.);
         imgproc::line(&mut image, pt1, pt2, color, 8, LINE_8, 0);
         imgproc::line(&mut image, pt2, pt3, color, 8, LINE_8, 0);
+
+        fn make_dist_map(m: Mat, aimage: &AnnotationEditor, size: Size) -> Mat {
+            let mut dist_map = Mat::zeros_size(size, CV_32F).unwrap().to_mat().unwrap();
+            dist_map
+        }
+
         self.render_cache = Some(RenderedMontageImage {
             image: image,
-            dist_map: Mat::default(),
+            dist_map: make_dist_map(m,&self.aimage,size),
         });
 
         Ok(Some({}))
@@ -162,7 +163,7 @@ impl Montage {
                     .map(|i| (i.dist(&p), i.sample(&p).unwrap()))
                     .collect();
 
-                 dist_color.sort_by(|(d, v), (d2, v2)| d.total_cmp(d2));
+                dist_color.sort_by(|(d, v), (d2, v2)| d.total_cmp(d2));
 
                 let a = dist_color.get(0).unwrap();
                 let b = dist_color.get(1).unwrap();
