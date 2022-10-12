@@ -77,7 +77,8 @@ impl MontageImage {
             for row in 0..size.height {
                 for col in 0..size.width {
                     *dist_map.at_2d_mut::<f64>(row, col).unwrap() =
-                        (Point2i::new(col, row) - pos).norm();
+                    (Point2i::new(col, row) - pos).norm();
+
                 }
             }
 
@@ -93,8 +94,13 @@ impl MontageImage {
     }
 
     fn dist(self: &MontageImage, p: &Point2i) -> f64 {
-        let d = (self.position - *p).norm();
-        d
+        self.render_cache
+            .as_ref()
+            .unwrap()
+            .dist_map
+            .at_2d::<f64>(p.y, p.x)
+            .unwrap()
+            .clone()
     }
     fn sample(self: &MontageImage, p: &Point2i) -> Result<Vec3d> {
         let q = self
