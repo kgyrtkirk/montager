@@ -107,7 +107,7 @@ impl MontageImage {
 
 #[allow(unused)]
 pub struct Montage {
-    image1: Option<Mat>,
+    render_buffer: Option<Mat>,
     images: Vec<MontageImage>,
     size: Size2i,
 }
@@ -119,18 +119,15 @@ impl Montage {
             width: 500,
             height: 500,
         };
-        let mut image = Mat::zeros_size(size, CV_8UC3).unwrap().to_mat().unwrap();
         let images = vec![
             MontageImage::new(&String::from("r2.png"), &Point2i::new(400, 100)),
             MontageImage::new(&String::from("r3.png"), &Point2i::new(100, 300)),
             // MontageImage::new(&String::from("r4.png"), &Point2i::new(400, 400)),
         ];
-        let mut p = images.get(0).unwrap();
-        let mut p = images.get(0).unwrap().position;
 
         // let images = vec![Box::new(m)];
         let mut m = Montage {
-            image1: None,
+            render_buffer: None,
             images: images,
             size: size,
         };
@@ -146,9 +143,9 @@ impl Montage {
             .map(|m| m.update(self.size).unwrap().is_some() as i32)
             .sum();
         if mod_count > 0 {
-            self.image1 = None;
+            self.render_buffer = None;
         }
-        if self.image1.is_some() {
+        if self.render_buffer.is_some() {
             return Ok({});
         }
 
@@ -204,7 +201,7 @@ impl Montage {
                 // self.image.re
             }
         }
-        self.image1 = Some(selfimage);
+        self.render_buffer = Some(selfimage);
 
         Ok({})
     }
@@ -309,7 +306,7 @@ pub fn editor(file_name: &Vec<String>) -> Result<()> {
         }
         let mut editor = montage_editor.lock().unwrap();
         editor.montage.render()?;
-        imshow(window, &editor.montage.image1.as_ref().unwrap())?;
+        imshow(window, &editor.montage.render_buffer.as_ref().unwrap())?;
         //        imshow(window, &editor.montage.images.get(0).unwrap().image2)?;
         //        imshow(window, &editor.montage.image)?;
         // if key == 's' as i32 {
