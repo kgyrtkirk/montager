@@ -1,5 +1,4 @@
 use std::{
-    ops::Add,
     sync::{Arc, Mutex},
 };
 
@@ -107,7 +106,7 @@ impl MontageImage {
 }
 
 #[allow(unused)]
-struct Montage {
+pub struct Montage {
     image1: Option<Mat>,
     images: Vec<MontageImage>,
     size: Size2i,
@@ -224,7 +223,7 @@ impl Modification for MoveModification {
     fn apply(&mut self, pos: &Point2i, montage: &mut Montage) {
         let delta = *pos - self.last_pos;
         if delta.norm() > 0. {
-            let mut img = (montage.images).get_mut(self.image_idx).unwrap();
+            let img = (montage.images).get_mut(self.image_idx).unwrap();
             img.move1(&delta);
             self.last_pos=*pos;
         }
