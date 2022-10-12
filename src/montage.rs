@@ -33,7 +33,7 @@ struct MontageImage {
 impl MontageImage {
     fn new(file_name: &String, pos: &Point2i) -> MontageImage {
         let image = imgcodecs::imread(&file_name, 1).unwrap();
-        // imgcodecs::conv
+        
         if image.size().unwrap().width <= 0 {
             panic!("Can't open file"); // FIXME: show filename
         }
@@ -233,8 +233,7 @@ impl Modification for MoveModification {
 struct MontageEditor {
     montage: Montage,
     // FIXME: figure out what +Send means
-    modState: Option<Box<dyn Modification + Send>>,
-    //    active_image : i32,
+    mod_state: Option<Box<dyn Modification + Send>>,
 }
 
 enum MouseEvent {
@@ -243,38 +242,29 @@ enum MouseEvent {
     LButtonUp,
 }
 
-impl MouseEvent {
-    pub fn isUp(&self) -> bool {
-        match self {
-            MouseEvent::LButtonUp => true,
-            _ => false,
-        }
-    }
-}
-
 #[allow(unused)]
 impl MontageEditor {
     fn new(file_name: &String) -> MontageEditor {
         let montage = Montage::new(file_name);
         MontageEditor {
             montage: montage,
-            modState: None,
+            mod_state: None,
         }
     }
     fn mouse_event(&mut self, event: MouseEvent, pos: &Point2i) {
-        if let Some(m) = self.modState.as_mut() {
+        if let Some(m) = self.mod_state.as_mut() {
             m.as_mut().apply(pos, &mut self.montage);
         }
 
         match (event) {
             MouseEvent::Move => {}
             MouseEvent::LButtonDown => {
-                self.modState = Some(Box::new(MoveModification {
+                self.mod_state = Some(Box::new(MoveModification {
                     last_pos: *pos,
                     image_idx: 0,
                 }))
             }
-            MouseEvent::LButtonUp => self.modState = None,
+            MouseEvent::LButtonUp => self.mod_state = None,
         }
     }
 }
