@@ -89,6 +89,22 @@ impl AnnotationEditor {
     fn add_point(self : &AnnotationEditor, point : Point2i) {
         self.points.lock().unwrap().push(point);
     }
+
+    pub(crate) fn make_dist_map(&self, m: Mat, size: Size_<i32>, pos: Point_<i32>) -> Mat {
+            let mut dist_map = Mat::zeros_size(size, CV_64F).unwrap().to_mat().unwrap();
+            for row in 0..size.height {
+                for col in 0..size.width {
+                    let p1 =Point2i::new(col, row);
+                    let p2 =Point2i::new(col, row);
+                    let d=(p1 - pos).norm();
+                    // let p2 =Point2i::new(col+50, row+50);
+                    *dist_map.at_2d_mut::<f64>(row, col).unwrap() =
+                        (d-100.0).max(0.1)
+
+                }
+            }
+            dist_map
+    }
 }
 
 

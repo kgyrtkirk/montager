@@ -72,26 +72,10 @@ impl MontageImage {
         imgproc::line(&mut image, pt1, pt2, color, 8, LINE_8, 0);
         imgproc::line(&mut image, pt2, pt3, color, 8, LINE_8, 0);
 
-        fn make_dist_map(m: Mat, aimage: &AnnotationEditor, size: Size, pos: Point2i) -> Mat {
-            let mut dist_map = Mat::zeros_size(size, CV_64F).unwrap().to_mat().unwrap();
-            for row in 0..size.height {
-                for col in 0..size.width {
-                    let p1 =Point2i::new(col, row);
-                    let p2 =Point2i::new(col, row);
-                    let d=(p1 - pos).norm();
-                    // let p2 =Point2i::new(col+50, row+50);
-                    *dist_map.at_2d_mut::<f64>(row, col).unwrap() =
-                        (d-100.0).max(0.1)
-
-                }
-            }
-
-            dist_map
-        }
 
         self.render_cache = Some(RenderedMontageImage {
             image: image,
-            dist_map: make_dist_map(m, &self.aimage, size, self.position),
+            dist_map: self.aimage.make_dist_map(m, size, self.position),
         });
 
         Ok(Some({}))
