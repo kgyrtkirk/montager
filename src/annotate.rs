@@ -67,17 +67,17 @@ impl AnnotationEditor {
     }
     fn draw(self: &AnnotationEditor) -> Result<Mat> {
         let mut frame = self.image.clone();
-        let points2 = &self.points;
-        let mut hull_points = VectorOfPoint::new(); //Mat::default();
-        if points2.len() > 0 {
-            convex_hull(&points2, &mut hull_points, true, true);
+        let points = &self.points;
+        let mut hull_points = VectorOfPoint::new();
+        if points.len() > 0 {
+            convex_hull(&points, &mut hull_points, true, true);
 
-            for i in 1..points2.len() {
+            for i in 1..points.len() {
                 let color = Scalar::new(255., 0., 255., 0.);
                 imgproc::line(
                     &mut frame,
-                    points2.get(i - 1)?,
-                    points2.get(i)?,
+                    points.get(i - 1)?,
+                    points.get(i)?,
                     color,
                     2,
                     LINE_8,
@@ -104,18 +104,21 @@ impl AnnotationEditor {
         self.points.push(point);
     }
 
-    pub(crate) fn make_dist_map(&self, m: Mat, size: Size_<i32>, pos: Point_<i32>) -> Mat {
-        let mut dist_map = Mat::zeros_size(size, CV_64F).unwrap().to_mat().unwrap();
+    pub(crate) fn make_dist_map(&self, m: Mat, size: Size_<i32>, pos: Point_<i32>) -> Result<Mat> {
+        let mut dist_map = Mat::zeros_size(size, CV_64F)?.to_mat()?;
+        let p=Vec3d::from([pos.x as f64,pos.y as f64,1.0]);
+        let p2=Mat::from_slice(&[pos.x as f64,pos.y as f64,1.0])?;
+        m*p2;
         for row in 0..size.height {
             for col in 0..size.width {
                 let p1 = Point2i::new(col, row);
                 let p2 = Point2i::new(col, row);
                 let d = (p1 - pos).norm();
                 // let p2 =Point2i::new(col+50, row+50);
-                *dist_map.at_2d_mut::<f64>(row, col).unwrap() = (d - 100.0).max(0.1)
+                *dist_map.at_2d_mut::<f64>(row, col)? = (d - 100.0).max(0.1)
             }
         }
-        dist_map
+        Ok(dist_map)
     }
 }
 
