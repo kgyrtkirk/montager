@@ -1,4 +1,7 @@
-use std::sync::{Arc, Mutex};
+use std::{
+    ops::Add,
+    sync::{Arc, Mutex},
+};
 
 use opencv::highgui::{EVENT_LBUTTONUP, EVENT_MOUSEMOVE};
 #[allow(unused)]
@@ -43,7 +46,7 @@ impl MontageImage {
         }
     }
     fn move1(&mut self, p: &Point2i) {
-        self.position = *p;
+        self.position += *p;
         self.render_cache = None;
     }
     fn update(&mut self, size: Size) -> Result<Option<()>> {
@@ -137,7 +140,7 @@ impl Montage {
     }
     fn render(&mut self) -> Result<()> {
         let mut changes = false;
-        // how about an event instead? 
+        // how about an event instead?
         let mod_count: i32 = self
             .images
             .iter_mut()
@@ -209,7 +212,7 @@ impl Montage {
 }
 
 struct MoveModification {
-    downPos: Point2i,
+    last_pos: Point2i,
     image_idx: usize,
 }
 
@@ -219,13 +222,11 @@ pub trait Modification {
 
 impl Modification for MoveModification {
     fn apply(&mut self, pos: &Point2i, montage: &mut Montage) {
-        // // let mut k = montage;
-        let mut i = (montage.images).get_mut(self.image_idx);
-        // let mut img = i.as_mut().unwrap();
-        i.unwrap().move1(&pos);
-        // // img.position.x=1;
-
-        // self.downPos = pos.clone();
+        let delta = *pos - self.last_pos;
+        if delta.norm() > 0. {
+            let mut img = (montage.images).get_mut(self.image_idx).unwrap();
+            img.move1(&delta);
+        }
     }
 }
 
@@ -269,7 +270,7 @@ impl MontageEditor {
             MouseEvent::Move => {}
             MouseEvent::LButtonDown => {
                 self.modState = Some(Box::new(MoveModification {
-                    downPos: *pos,
+                    last_pos: *pos,
                     image_idx: 0,
                 }))
             }
