@@ -14,6 +14,7 @@ use opencv::{
 
 use crate::annotate::AnnotationEditor;
 
+#[allow(unused)]
 struct RenderedMontageImage {
     image: Mat,
     dist_map: Mat,
@@ -288,8 +289,7 @@ pub fn editor(file_name: &Vec<String>) -> Result<()> {
     highgui::set_mouse_callback(
         window,
         Some(Box::new({
-            let mut montage_editor = Arc::clone(&montage_editor);
-            let mut modification: Option<Arc<Mutex<dyn Modification + Send>>> = None;
+            let montage_editor = Arc::clone(&montage_editor);
             move |event, x, y, _flags| {
                 let p = Point2i::new(x, y);
                 let mut montage_editor = montage_editor.lock().unwrap();
@@ -297,45 +297,12 @@ pub fn editor(file_name: &Vec<String>) -> Result<()> {
                 match event {
                     EVENT_MOUSEMOVE => {
                         montage_editor.mouse_event(MouseEvent::Move, &p);
-                        println!("M {:?} ", p);
-                        // let ms=montage.modState;
-                        // if let Some(m) = ms.as_mut() {
-                        //     m.apply(p,&mut montage.montage);
-                        // }
-                        // if let Some(m) = &modification {
-                        //     let mut montage = montage.lock().unwrap();
-                        //     // let mm = &mut montage.montage;
-                        //     m.lock().unwrap().apply(p, &mut montage.montage);
-                        // }
                     }
                     EVENT_LBUTTONDOWN => {
                         montage_editor.mouse_event(MouseEvent::LButtonDown, &p);
-                        // let idx = 0;
-                        // modification = Some(Arc::new(Mutex::new(MoveModification {
-                        //     downPos: p,
-                        //     currPos: p,
-                        //     image_idx: idx,
-                        // })));
-                        println!("LB {} {} ", x, y);
                     }
                     EVENT_LBUTTONUP => {
                         montage_editor.mouse_event(MouseEvent::LButtonUp, &p);
-                        // let mo = montage.modState.take();
-                        // if let Some(m) = &modification {
-                        //     let mut locked=montage_editor.lock();
-                        //     let  mutt =locked.as_mut();
-                        //     let mut montage = mutt.unwrap();
-                        //     // let mm = &mut montage.montage;
-                        //     // m.lock().unwrap().apply(p, &mut montage.montage);
-                        //     montage.montage.images.get(0).unwrap().move1(&Point2i::new(1, 2));
-                        // }
-                        // montage.modState= mo.clone();
-
-                        // if let Some(m) = mo {
-                        //     // let mut q=&montage.montage;
-                        //     m.apply(p,mm);
-                        // }
-                        // montage.modState=None;
                     }
                     _ => {}
                 }
