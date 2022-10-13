@@ -9,7 +9,7 @@ use clap::Parser;
 use clap::*;
 mod annotate;
 mod montage;
-
+mod glue;
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum,Debug)]
 enum Mode {
@@ -70,4 +70,5 @@ fn main1() -> Result<()> {
 	}
 	Ok(())
 }
+
 

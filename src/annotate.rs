@@ -5,7 +5,7 @@ use opencv::{
     highgui::{self, imshow, resize_window, EVENT_LBUTTONDOWN, WINDOW_GUI_EXPANDED},
     imgcodecs,
     imgproc::{self, convex_hull, LINE_8},
-    prelude::*,
+    // prelude::*,
     types::VectorOfPoint,
     Result,
 };
@@ -105,6 +105,7 @@ impl AnnotationEditor {
     }
 
     pub(crate) fn make_dist_map(&self, m: Mat, size: Size_<i32>, pos: Point_<i32>) -> Result<Mat> {
+
         let mut dist_map = Mat::zeros_size(size, CV_64F)?.to_mat()?;
         fn map_point(m: &Mat, pos: &Point) -> Result<Point2i> {
             let p2 = Mat::from_slice(&[pos.x as f64, pos.y as f64, 1.0])?;
