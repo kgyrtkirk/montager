@@ -72,7 +72,6 @@ impl MontageImage {
         imgproc::line(&mut image, pt1, pt2, color, 8, LINE_8, 0);
         imgproc::line(&mut image, pt2, pt3, color, 8, LINE_8, 0);
 
-
         self.render_cache = Some(RenderedMontageImage {
             image: image,
             dist_map: self.aimage.make_dist_map(m, size, self.position)?,

@@ -19,7 +19,7 @@ struct OnDiskAnnotations {
 }
 
 pub struct AnnotationEditor {
-    points: VectorOfPoint, // = Arc::new(Mutex::new(VectorOfPoint::new()));
+    points: VectorOfPoint,
     annotation_file: String,
     #[allow(unused)]
     file_name: String,
@@ -65,12 +65,29 @@ impl AnnotationEditor {
         serde_yaml::to_writer(f, &ann).unwrap();
         dbg!("annot written");
     }
+    fn hull(&self) -> Result<Vector<Point_<i32>>> {
+        let points = &self.points;
+        if points.len() >= 3 {
+            let mut hull_points = VectorOfPoint::new();
+            convex_hull(points, &mut hull_points, true, true)?;
+            Ok(hull_points)
+        } else {
+            let size = self.image.size()?;
+            let mut hull_points = VectorOfPoint::from_slice(&[
+                Point2i::new(0, 0),
+                Point2i::new(size.width, 0),
+                Point2i::new(size.width, size.height),
+                Point2i::new(0, size.height),
+            ]);
+            Ok(hull_points)
+        }
+    }
+
     fn draw(self: &AnnotationEditor) -> Result<Mat> {
         let mut frame = self.image.clone();
         let points = &self.points;
-        let mut hull_points = VectorOfPoint::new();
         if points.len() > 0 {
-            convex_hull(&points, &mut hull_points, true, true);
+            let hull_points = self.hull()?;
 
             for i in 1..points.len() {
                 let color = Scalar::new(255., 0., 255., 0.);
@@ -105,7 +122,6 @@ impl AnnotationEditor {
     }
 
     pub(crate) fn make_dist_map(&self, m: Mat, size: Size_<i32>, pos: Point_<i32>) -> Result<Mat> {
-
         let mut dist_map = Mat::zeros_size(size, CV_64F)?.to_mat()?;
         fn map_point(m: &Mat, pos: &Point) -> Result<Point2i> {
             let p2 = Mat::from_slice(&[pos.x as f64, pos.y as f64, 1.0])?;
