@@ -2,7 +2,7 @@ use opencv::core::*;
 use opencv::types::{VectorOfPoint2d, VectorOfPoint};
 use opencv::*;
 
-trait PolyDist {
+pub trait PolyDist {
     fn dist(&self, p: &Point_<f64>) -> Result<f64>;
 }
 
@@ -30,18 +30,18 @@ pub trait Transform  {
     fn map_point(&mut self, m: &Mat) ;
 }
 
-impl Transform for Point2i {
+impl Transform for Point2d {
     fn map_point(&mut self, m: &Mat) {
         // let a=Vec3d::from([pos.x as f64, pos.y as f64, 1.0]);
         // let p2=a.to_mat().unwrap();
         let p2 = Mat::from_slice(&[self.x as f64, self.y as f64, 1.0]).unwrap().t().unwrap();
         let r = (m * p2).into_result().unwrap().to_mat().unwrap();
         let a: Point2i = Point2i::new(*r.at::<f64>(0).unwrap() as i32, *r.at::<f64>(1).unwrap() as i32);
-        *self=a;
+        *self=Point2d::new(a.x as f64 , a.y as f64);
     }
 }
 
-impl Transform for VectorOfPoint {
+impl Transform for VectorOfPoint2d {
 
     fn map_point(&mut self, m: &Mat) {
 
@@ -85,6 +85,7 @@ impl PolyDist for VectorOfPoint2d {
         Ok(dist)
     }
 }
+
 
 #[cfg(test)]
 mod tests {

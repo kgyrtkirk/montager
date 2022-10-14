@@ -6,7 +6,7 @@ use opencv::{
     imgcodecs,
     imgproc::{self, convex_hull, LINE_8},
     // prelude::*,
-    types::VectorOfPoint,
+    types::{VectorOfPoint, VectorOfPoint2d},
 //    Result,
 };
 
@@ -15,6 +15,7 @@ use serde::{Deserialize, Serialize};
 use serde_yaml::{self};
 
 use crate::poly_distance::Transform;
+use crate::poly_distance::PolyDist;
 
 
 #[allow(unused)]
@@ -70,19 +71,24 @@ impl AnnotationEditor {
         serde_yaml::to_writer(f, &ann).unwrap();
         dbg!("annot written");
     }
-    fn hull(&self) -> Result<Vector<Point_<i32>>> {
+    fn hull(&self) -> Result<Vector<Point_<f64>>> {
         let points = &self.points;
         if points.len() >= 3 {
             let mut hull_points = VectorOfPoint::new();
-            convex_hull(points, &mut hull_points, true, true)?;
-            Ok(hull_points)
+            convex_hull(points, &mut hull_points, true, true).unwrap();
+            let mut hull_points2 = VectorOfPoint2d::new();
+            for p in hull_points {
+                hull_points2.push(Point2d::new(p.x as f64,p.y as f64));
+            }
+
+            Ok(hull_points2)
         } else {
             let size = self.image.size()?;
-            let mut hull_points = VectorOfPoint::from_slice(&[
-                Point2i::new(0, 0),
-                Point2i::new(size.width, 0),
-                Point2i::new(size.width, size.height),
-                Point2i::new(0, size.height),
+            let mut hull_points = VectorOfPoint2d::from_slice(&[
+                Point2d::new(0.0f64, 0.0f64),
+                Point2d::new(size.width as f64, 0.0f64),
+                Point2d::new(size.width as f64, size.height as f64),
+                Point2d::new(0.0f64, size.height as f64),
             ]);
             Ok(hull_points)
         }
@@ -106,19 +112,19 @@ impl AnnotationEditor {
                     0,
                 )?;
             }
-            for i in 0..hull_points.len() {
-                let color = Scalar::new(0., 255., 0., 0.);
-                let j = if i > 0 { i - 1 } else { hull_points.len() - 1 };
-                imgproc::line(
-                    &mut frame,
-                    hull_points.get(j)?,
-                    hull_points.get(i)?,
-                    color,
-                    2,
-                    LINE_8,
-                    0,
-                )?;
-            }
+            // for i in 0..hull_points.len() {
+            //     let color = Scalar::new(0., 255., 0., 0.);
+            //     let j = if i > 0 { i - 1 } else { hull_points.len() - 1 };
+            //     imgproc::line(
+            //         &mut frame,
+            //         hull_points.get(j)?,
+            //         hull_points.get(i)?,
+            //         color,
+            //         2,
+            //         LINE_8,
+            //         0,
+            //     )?;
+            // }
         }
         Ok(frame)
     }
@@ -130,18 +136,18 @@ impl AnnotationEditor {
     pub(crate) fn make_dist_map(&self, m: Mat, size: Size_<i32>, pos: Point_<i32>) -> Result<Mat> {
         let mut dist_map = Mat::zeros_size(size, CV_64F).unwrap().to_mat().unwrap();
 
-        let mut pp : VectorOfPoint=self.hull()?;
+        let mut pp : VectorOfPoint2d=self.hull()?;
         pp.map_point(&m);
-        // for p in self.hull() {
-
-        // }
 
         for row in 0..size.height {
             for col in 0..size.width {
+                let p = Point2d::new(col as f64, row as f64);
                 let p1 = Point2i::new(col, row);
                 let p2 = Point2i::new(col, row);
-                let d = (p1 - pos).norm();
-                *dist_map.at_2d_mut::<f64>(row, col)? = (d - 100.0).max(0.1)
+               let d = (p1 - pos).norm();
+                let mut d=pp.dist(&p).unwrap();
+                d=d.max(0.0f64);
+                *dist_map.at_2d_mut::<f64>(row, col).unwrap() = d;//(d - 100.0).max(0.1)
             }
         }
         Ok(dist_map)
