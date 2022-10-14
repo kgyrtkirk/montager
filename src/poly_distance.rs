@@ -1,6 +1,24 @@
 use opencv::core::*;
-use opencv::types::{VectorOfPoint2d, VectorOfPoint};
+use opencv::types::{VectorOfPoint2d};
 use opencv::*;
+
+
+pub trait F64I32Bridge<B> {
+    fn to_f64(self : Self) -> B;
+}
+
+impl F64I32Bridge<Point2d> for Point {
+    fn to_f64(self : Self) -> Point2d {
+        Point2d::new(self.x as f64, self.y as f64)
+    }
+}
+
+impl F64I32Bridge<Point2i> for Point2d {
+    fn to_f64(self : Self) -> Point2i {
+        Point2i::new(self.x as i32, self.y as i32)
+    }
+}
+
 
 pub trait PolyDist {
     fn dist(&self, p: &Point_<f64>) -> Result<f64>;

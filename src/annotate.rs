@@ -16,6 +16,7 @@ use serde_yaml::{self};
 
 use crate::poly_distance::Transform;
 use crate::poly_distance::PolyDist;
+use crate::poly_distance::F64I32Bridge;
 
 
 #[allow(unused)]
@@ -112,19 +113,19 @@ impl AnnotationEditor {
                     0,
                 )?;
             }
-            // for i in 0..hull_points.len() {
-            //     let color = Scalar::new(0., 255., 0., 0.);
-            //     let j = if i > 0 { i - 1 } else { hull_points.len() - 1 };
-            //     imgproc::line(
-            //         &mut frame,
-            //         hull_points.get(j)?,
-            //         hull_points.get(i)?,
-            //         color,
-            //         2,
-            //         LINE_8,
-            //         0,
-            //     )?;
-            // }
+            for i in 0..hull_points.len() {
+                let color = Scalar::new(0., 255., 0., 0.);
+                let j = if i > 0 { i - 1 } else { hull_points.len() - 1 };
+                imgproc::line(
+                    &mut frame,
+                    hull_points.get(j)?.to_f64(),
+                    hull_points.get(i)?.to_f64(),
+                    color,
+                    2,
+                    LINE_8,
+                    0,
+                )?;
+            }
         }
         Ok(frame)
     }
@@ -147,7 +148,7 @@ impl AnnotationEditor {
                let d = (p1 - pos).norm();
                 let mut d=pp.dist(&p).unwrap();
                 d=d.max(0.0f64);
-                *dist_map.at_2d_mut::<f64>(row, col).unwrap() = d;//(d - 100.0).max(0.1)
+                *dist_map.at_2d_mut::<f64>(row, col).unwrap() = d;
             }
         }
         Ok(dist_map)
