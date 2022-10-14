@@ -5,7 +5,7 @@ use shape_core::*;
 // use shape_core::;
 use projective::Projective;
 // use 
-use num_traits::real::Real;
+// use num_traits::real::Real;
 
 #[derive(Debug)]
 #[allow(unused)]
@@ -28,16 +28,29 @@ impl Into<i32> for X {
 
 fn fx(){
     let mut p : Point<f64> = Point::new(1.0f64,0.0f64);
-    // let x : Projective = p;
-    // let m = Mat::from_slice_2d(&[ [1,0,10],[0,1,10],[0,0,1]])?;
-    // p.translate_x(1.0f64);
-    // use shape_core::Point;
+    let mut p2 : Point<f64> = Point::new(2.0f64,1.0f64);
+    let d=p.distance_to(&p2);
     
     p.translate_x(&1.0f64);
-    // println!("{:#}", Point::new(100, 100).tra);
-
-
 }
+
+
+fn fx2(){
+    let mut p1 : Point<f64> = Point::new(1.0f64,0.0f64);
+    let mut p2 : Point<f64> = Point::new(2.0f64,1.0f64);
+    let mut p3 : Point<f64> = Point::new(2.0f64,1.0f64);
+    let points = vec![p1,p2,p3];
+    let mut p  = Polygon::new(points);
+    let mut p2 : Point<f64> = Point::new(2.0f64,1.0f64);
+
+
+    
+    // let d=p.distance_to(&p2);
+    
+    p.translate_x(&1.0f64);
+}
+
+
 #[cfg(test)]
 mod tests {
             // Note this useful idiom: importing names from outer (for mod tests) scope.
@@ -57,5 +70,8 @@ mod tests {
         // let x = X { x: 1, y: 2 };
         // let v : i32 = x.into();
         // assert_eq!(v,3);
+    }
+    fn testMatToProjective2() {
+        fx2();
     }
 }

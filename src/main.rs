@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate approx;
+
 use opencv::{
 	highgui,
 	prelude::*,
@@ -10,6 +13,7 @@ use clap::*;
 mod annotate;
 mod montage;
 mod glue;
+mod poly_distance;
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum,Debug)]
 enum Mode {
