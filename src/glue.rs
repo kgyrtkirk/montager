@@ -1,4 +1,3 @@
-use opencv::prelude::Mat;
 
 use shape_core::*;
 // use shape_core;
@@ -26,6 +25,7 @@ impl Into<i32> for X {
 //     }
 // }
 
+#[allow(unused)]
 fn fx(){
     let mut p : Point<f64> = Point::new(1.0f64,0.0f64);
     let mut p2 : Point<f64> = Point::new(2.0f64,1.0f64);
@@ -35,6 +35,7 @@ fn fx(){
 }
 
 
+#[allow(unused)]
 fn fx2(){
     let mut p1 : Point<f64> = Point::new(1.0f64,0.0f64);
     let mut p2 : Point<f64> = Point::new(2.0f64,1.0f64);
@@ -57,21 +58,22 @@ mod tests {
     use super::*;
 
     #[test]
-    fn testConversion() {
+    fn test_conversion() {
         let x = X { x: 1, y: 2 };
         let v : i32 = x.into();
         assert_eq!(v,3);
     }
 
     #[test]
-    fn testMatToProjective() {
+    fn test_mat_to_projective() {
         fx();
 
         // let x = X { x: 1, y: 2 };
         // let v : i32 = x.into();
         // assert_eq!(v,3);
     }
-    fn testMatToProjective2() {
+    #[test]
+    fn test_mat_to_projective2() {
         fx2();
     }
 }
