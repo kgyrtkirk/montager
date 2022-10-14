@@ -1,5 +1,5 @@
 use opencv::core::*;
-use opencv::types::VectorOfPoint2d;
+use opencv::types::{VectorOfPoint2d, VectorOfPoint};
 use opencv::*;
 
 trait PolyDist {
@@ -24,6 +24,39 @@ impl AbsMin for f64 {
             *self = *o;
         }
     }
+}
+
+pub trait Transform  {
+    fn map_point(&mut self, m: &Mat) ;
+}
+
+impl Transform for Point2i {
+    fn map_point(&mut self, m: &Mat) {
+        // let a=Vec3d::from([pos.x as f64, pos.y as f64, 1.0]);
+        // let p2=a.to_mat().unwrap();
+        let p2 = Mat::from_slice(&[self.x as f64, self.y as f64, 1.0]).unwrap().t().unwrap();
+        let r = (m * p2).into_result().unwrap().to_mat().unwrap();
+        let a: Point2i = Point2i::new(*r.at::<f64>(0).unwrap() as i32, *r.at::<f64>(1).unwrap() as i32);
+        *self=a;
+    }
+}
+
+impl Transform for VectorOfPoint {
+
+    fn map_point(&mut self, m: &Mat) {
+
+        for p in self.as_mut_slice() {
+            p.map_point(m);
+        }
+        // // let a=Vec3d::from([pos.x as f64, pos.y as f64, 1.0]);
+        // // let p2=a.to_mat().unwrap();
+        // let p2 = Mat::from_slice(&[pos.x as f64, pos.y as f64, 1.0]).unwrap().t().unwrap();
+        // let r = (m * p2).into_result().unwrap().to_mat().unwrap();
+        // let a: Point2i = Point2i::new(*r.at::<f64>(0).unwrap() as i32, *r.at::<f64>(1).unwrap() as i32);
+        // a
+    }
+
+
 }
 
 // FIXME: signed dist is only valid for convex polys

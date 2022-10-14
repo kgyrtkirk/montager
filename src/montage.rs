@@ -9,9 +9,9 @@ use opencv::{
     imgproc::{self, INTER_LINEAR, LINE_8},
     prelude::*,
     types::VectorOfPoint,
-    Result,
+    // Result,
 };
-
+use color_eyre::Result;
 use crate::annotate::AnnotationEditor;
 
 #[allow(unused)]

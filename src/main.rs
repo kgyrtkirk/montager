@@ -5,9 +5,10 @@ extern crate approx;
 use opencv::{
 	highgui,
 	prelude::*,
-	Result,
+	// Result,
 	videoio,
 };
+use color_eyre::Result;
 
 use clap::Parser;
 use clap::*;
@@ -31,6 +32,7 @@ struct Args {
 }
 
 fn main() -> Result<()> {
+	color_eyre::install()?;
 	let args = Args::parse();
 
 	match args.mode {

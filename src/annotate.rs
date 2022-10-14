@@ -7,10 +7,15 @@ use opencv::{
     imgproc::{self, convex_hull, LINE_8},
     // prelude::*,
     types::VectorOfPoint,
-    Result,
+//    Result,
 };
+
+use color_eyre::Result;
 use serde::{Deserialize, Serialize};
 use serde_yaml::{self};
+
+use crate::poly_distance::Transform;
+
 
 #[allow(unused)]
 #[derive(Debug, Serialize, Deserialize)]
@@ -117,20 +122,19 @@ impl AnnotationEditor {
         }
         Ok(frame)
     }
+
     fn add_point(self: &mut AnnotationEditor, point: Point2i) {
         self.points.push(point);
     }
 
     pub(crate) fn make_dist_map(&self, m: Mat, size: Size_<i32>, pos: Point_<i32>) -> Result<Mat> {
-        let mut dist_map = Mat::zeros_size(size, CV_64F)?.to_mat()?;
-        fn map_point(m: &Mat, pos: &Point) -> Result<Point2i> {
-            let p2 = Mat::from_slice(&[pos.x as f64, pos.y as f64, 1.0])?;
-            let r = (m * p2).into_result()?.to_mat()?;
-            let a: Point2i = Point2i::new(*r.at::<f64>(0)? as i32, *r.at::<f64>(1)? as i32);
-            Ok(a)
-        }
+        let mut dist_map = Mat::zeros_size(size, CV_64F).unwrap().to_mat().unwrap();
 
-        // let r = map_point(&m, &pos)?;
+        let mut pp : VectorOfPoint=self.hull()?;
+        pp.map_point(&m);
+        // for p in self.hull() {
+
+        // }
 
         for row in 0..size.height {
             for col in 0..size.width {
