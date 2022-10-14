@@ -14,6 +14,18 @@ impl PolyDist for core::Point_<f64> {
     }
 }
 
+trait AbsMin {
+    fn abs_min(&mut self, o: &Self);
+}
+
+impl AbsMin for f64 {
+    fn abs_min(&mut self, o: &Self) {
+        if self.abs() > o.abs() {
+            *self = *o;
+        }
+    }
+}
+
 // FIXME: signed dist is only valid for convex polys
 impl PolyDist for VectorOfPoint2d {
     fn dist(&self, p: &Point_<f64>) -> Result<f64> {
@@ -28,21 +40,12 @@ impl PolyDist for VectorOfPoint2d {
             let v = *p - p1;
             let vl = v.dot(n);
             if 0.0f64 <= vl && vl <= l {
-                let r = n.cross(v);
-                if dist.abs() > r.abs() {
-                    dist = r;
-                }
+                dist.abs_min( &n.cross(v));
             } else {
                 if vl <= 0.0f64 {
-                    let r = p.dist(&p1)?;
-                    if dist.abs() > r.abs() {
-                        dist = r;
-                    }
+                    dist.abs_min( &p.dist(&p1)?);
                 } else {
-                    let r = p.dist(&p2)?;
-                    if dist.abs() > r.abs() {
-                        dist = r;
-                    }
+                    dist.abs_min( &p.dist(&p2)?);
                 }
             }
         }
