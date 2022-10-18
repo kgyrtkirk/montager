@@ -81,7 +81,7 @@ impl MontageImage {
         self.render_cache = Some(RenderedMontageImage {
             image: image,
             // image: self.aimage.make_transformed_image(m,size),
-            dist_map: self.aimage.make_dist_map(m, size, self.position)?,
+            dist_map: self.aimage.make_dist_map(m, size)?,
         });
 
         Ok(Some({}))
