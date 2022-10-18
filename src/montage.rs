@@ -1,6 +1,7 @@
 use std::{
     collections::HashMap,
-    sync::{Arc, Mutex}, hash::Hash,
+    hash::Hash,
+    sync::{Arc, Mutex},
 };
 
 use crate::annotate::AnnotationEditor;
@@ -210,33 +211,15 @@ impl Modification for MoveModification {
     }
 }
 
-enum EditorOptionType {
-    ShowBoundaries,
-}
-impl Hash for EditorOptionType {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        core::mem::discriminant(self).hash(state);
-    }
-}
-
-impl PartialEq for EditorOptionType {
-    fn eq(&self, other: &Self) -> bool {
-        core::mem::discriminant(self) == core::mem::discriminant(other)
-    }
-}
-impl Eq for EditorOptionType {
-    fn assert_receiver_is_total_eq(&self) {}
-}
-
-
-trait EditorOption {
-    fn getType(&self) -> EditorOptionType;
+#[derive(Default)]
+struct EditorOptions {
+    showBoundaries: bool,
 }
 
 struct MontageEditor {
     montage: Montage,
     // FIXME: figure out what +Send means
-    options: HashMap<EditorOptionType, Box<dyn EditorOption + Send>>,
+    options: EditorOptions,
     mod_state: Option<Box<dyn Modification + Send>>,
 }
 
@@ -252,7 +235,7 @@ impl MontageEditor {
         let montage = Montage::new(file_name);
         MontageEditor {
             montage: montage,
-            options: HashMap::new(),
+            options: Default::default(),
             mod_state: None,
         }
     }
@@ -315,18 +298,9 @@ pub fn editor(file_name: &Vec<String>) -> Result<()> {
         let mut editor = montage_editor.lock().unwrap();
 
         if key == 'e' as i32 {
-            let a =editor.options.get(&EditorOptionType::ShowBoundaries);
-            
-            // let a =editor.options[EditorOptionType::ShowBoundaries];
-            let mut book_reviews = HashMap::new();
-            book_reviews.insert(
-                EditorOptionType::ShowBoundaries,
-                "My favorite book.".to_string(),
-            );
-            
-println!("Review for Jane: {}", book_reviews[&EditorOptionType::ShowBoundaries]);
-
-            
+            // FIXME: ideally this should be emitting an event automatically
+            editor.options.showBoundaries = !editor.options.showBoundaries;
+            editor.montage.render_buffer = None;
         }
         editor.montage.render()?;
         imshow(window, &editor.montage.render_buffer.as_ref().unwrap())?;
