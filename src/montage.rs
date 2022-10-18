@@ -1,6 +1,4 @@
 use std::{
-    collections::HashMap,
-    hash::Hash,
     sync::{Arc, Mutex},
 };
 
@@ -29,6 +27,7 @@ struct MontageImage {
     aimage: AnnotationEditor,
     position: Point2i,
     render_cache: Option<RenderedMontageImage>,
+    options: MontageOptions,
 }
 
 #[allow(unused)]
@@ -44,6 +43,7 @@ impl MontageImage {
             aimage: AnnotationEditor::new(file_name),
             position: pos.clone(),
             render_cache: None,
+            options: Default::default(),
         }
     }
     fn move1(&mut self, p: &Point2i) {
@@ -69,15 +69,18 @@ impl MontageImage {
             BORDER_CONSTANT,
             Scalar::new(0.0, 0.0, 0.0, 0.0),
         );
-        let pt1 = Point2i::new(0, 0);
-        let pt2 = self.position;
-        let pt3 = Point2i::new(size.width, size.height);
-        let color = Scalar::new(0., 255., 255., 255.);
-        imgproc::line(&mut image, pt1, pt2, color, 8, LINE_8, 0);
-        imgproc::line(&mut image, pt2, pt3, color, 8, LINE_8, 0);
+        // let pt1 = Point2i::new(0, 0);
+        // let pt2 = self.position;
+        // let pt3 = Point2i::new(size.width, size.height);
+        // let color = Scalar::new(0., 255., 255., 255.);
+        // imgproc::line(&mut image, pt1, pt2, color, 8, LINE_8, 0);
+        // imgproc::line(&mut image, pt2, pt3, color, 8, LINE_8, 0);
 
+
+        
         self.render_cache = Some(RenderedMontageImage {
             image: image,
+            // image: self.aimage.make_transformed_image(m,size),
             dist_map: self.aimage.make_dist_map(m, size, self.position)?,
         });
 
@@ -108,6 +111,10 @@ impl MontageImage {
         // Ok(q.clone())
         Ok(r)
     }
+
+    fn set_show_boundaries(&mut self, show_boundaries: bool) {
+        self.options.show_boundaries=show_boundaries;
+    }
 }
 
 #[allow(unused)]
@@ -115,6 +122,7 @@ pub struct Montage {
     render_buffer: Option<Mat>,
     images: Vec<MontageImage>,
     size: Size2i,
+    options: MontageOptions,
 }
 
 #[allow(unused)]
@@ -135,6 +143,7 @@ impl Montage {
             render_buffer: None,
             images: images,
             size: size,
+            options: Default::default(),
         };
         m.render();
         m
@@ -189,6 +198,13 @@ impl Montage {
 
         Ok({})
     }
+
+    fn toggle_show_boundaries(&mut self) {
+        self.options.show_boundaries = !self.options.show_boundaries;
+        for i in &mut self.images {
+            i.set_show_boundaries(self.options.show_boundaries);
+        }
+}
 }
 
 struct MoveModification {
@@ -212,14 +228,13 @@ impl Modification for MoveModification {
 }
 
 #[derive(Default)]
-struct EditorOptions {
-    showBoundaries: bool,
+struct MontageOptions {
+    show_boundaries: bool,
 }
 
 struct MontageEditor {
     montage: Montage,
     // FIXME: figure out what +Send means
-    options: EditorOptions,
     mod_state: Option<Box<dyn Modification + Send>>,
 }
 
@@ -235,7 +250,6 @@ impl MontageEditor {
         let montage = Montage::new(file_name);
         MontageEditor {
             montage: montage,
-            options: Default::default(),
             mod_state: None,
         }
     }
@@ -299,8 +313,7 @@ pub fn editor(file_name: &Vec<String>) -> Result<()> {
 
         if key == 'e' as i32 {
             // FIXME: ideally this should be emitting an event automatically
-            editor.options.showBoundaries = !editor.options.showBoundaries;
-            editor.montage.render_buffer = None;
+            editor.montage.toggle_show_boundaries();
         }
         editor.montage.render()?;
         imshow(window, &editor.montage.render_buffer.as_ref().unwrap())?;

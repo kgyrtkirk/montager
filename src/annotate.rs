@@ -138,7 +138,7 @@ impl AnnotationEditor {
         let mut dist_map = Mat::zeros_size(size, CV_64F).unwrap().to_mat().unwrap();
 
         let mut pp : VectorOfPoint2d=self.hull()?;
-        pp.map_point(&m);
+        pp.transform(&m);
 
         for row in 0..size.height {
             for col in 0..size.width {

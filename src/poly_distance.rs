@@ -45,11 +45,11 @@ impl AbsMin for f64 {
 }
 
 pub trait Transform  {
-    fn map_point(&mut self, m: &Mat) ;
+    fn transform(&mut self, m: &Mat) ;
 }
 
 impl Transform for Point2d {
-    fn map_point(&mut self, m: &Mat) {
+    fn transform(&mut self, m: &Mat) {
         // let a=Vec3d::from([pos.x as f64, pos.y as f64, 1.0]);
         // let p2=a.to_mat().unwrap();
         let p2 = Mat::from_slice(&[self.x as f64, self.y as f64, 1.0]).unwrap().t().unwrap();
@@ -61,10 +61,10 @@ impl Transform for Point2d {
 
 impl Transform for VectorOfPoint2d {
 
-    fn map_point(&mut self, m: &Mat) {
+    fn transform(&mut self, m: &Mat) {
 
         for p in self.as_mut_slice() {
-            p.map_point(m);
+            p.transform(m);
         }
         // // let a=Vec3d::from([pos.x as f64, pos.y as f64, 1.0]);
         // // let p2=a.to_mat().unwrap();
