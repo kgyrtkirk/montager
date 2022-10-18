@@ -1,5 +1,10 @@
-use std::sync::{Arc, Mutex};
+use std::{
+    collections::HashMap,
+    sync::{Arc, Mutex}, hash::Hash,
+};
 
+use crate::annotate::AnnotationEditor;
+use color_eyre::Result;
 use opencv::highgui::{EVENT_LBUTTONUP, EVENT_MOUSEMOVE};
 #[allow(unused)]
 use opencv::{
@@ -11,8 +16,6 @@ use opencv::{
     types::VectorOfPoint,
     // Result,
 };
-use color_eyre::Result;
-use crate::annotate::AnnotationEditor;
 
 #[allow(unused)]
 struct RenderedMontageImage {
@@ -51,7 +54,7 @@ impl MontageImage {
             return Ok(None);
         }
 
-        let mut m = imgproc::get_rotation_matrix_2d(Point2f::new(0.0, 0.0), -10.0, 0.5)?;
+        let mut m = imgproc::get_rotation_matrix_2d(Point2f::new(0.0, 0.0), 0.0, 0.5)?;
         *m.at_2d_mut::<f64>(0, 2)? = self.position.x as f64;
         *m.at_2d_mut::<f64>(1, 2)? = self.position.y as f64;
 
@@ -121,9 +124,9 @@ impl Montage {
             height: 500,
         };
         let images = vec![
-            MontageImage::new(&String::from("r2.png"), &Point2i::new(400, 100)),
-            MontageImage::new(&String::from("r3.png"), &Point2i::new(100, 300)),
-            MontageImage::new(&String::from("r4.png"), &Point2i::new(400, 400)),
+            MontageImage::new(&String::from("r2.png"), &Point2i::new(300, 50)),
+            MontageImage::new(&String::from("r3.png"), &Point2i::new(50, 150)),
+            MontageImage::new(&String::from("r4.png"), &Point2i::new(300, 250)),
         ];
 
         // let images = vec![Box::new(m)];
@@ -207,9 +210,33 @@ impl Modification for MoveModification {
     }
 }
 
+enum EditorOptionType {
+    ShowBoundaries,
+}
+impl Hash for EditorOptionType {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        core::mem::discriminant(self).hash(state);
+    }
+}
+
+impl PartialEq for EditorOptionType {
+    fn eq(&self, other: &Self) -> bool {
+        core::mem::discriminant(self) == core::mem::discriminant(other)
+    }
+}
+impl Eq for EditorOptionType {
+    fn assert_receiver_is_total_eq(&self) {}
+}
+
+
+trait EditorOption {
+    fn getType(&self) -> EditorOptionType;
+}
+
 struct MontageEditor {
     montage: Montage,
     // FIXME: figure out what +Send means
+    options: HashMap<EditorOptionType, Box<dyn EditorOption + Send>>,
     mod_state: Option<Box<dyn Modification + Send>>,
 }
 
@@ -225,6 +252,7 @@ impl MontageEditor {
         let montage = Montage::new(file_name);
         MontageEditor {
             montage: montage,
+            options: HashMap::new(),
             mod_state: None,
         }
     }
@@ -280,11 +308,26 @@ pub fn editor(file_name: &Vec<String>) -> Result<()> {
 
     resize_window(window, 500, 500)?;
     loop {
-        let key = highgui::wait_key(10)?;
+        let key = highgui::wait_key(50)?;
         if key == 27 {
             break;
         }
         let mut editor = montage_editor.lock().unwrap();
+
+        if key == 'e' as i32 {
+            let a =editor.options.get(&EditorOptionType::ShowBoundaries);
+            
+            // let a =editor.options[EditorOptionType::ShowBoundaries];
+            let mut book_reviews = HashMap::new();
+            book_reviews.insert(
+                EditorOptionType::ShowBoundaries,
+                "My favorite book.".to_string(),
+            );
+            
+println!("Review for Jane: {}", book_reviews[&EditorOptionType::ShowBoundaries]);
+
+            
+        }
         editor.montage.render()?;
         imshow(window, &editor.montage.render_buffer.as_ref().unwrap())?;
     }
