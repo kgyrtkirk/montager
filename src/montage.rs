@@ -27,7 +27,6 @@ struct MontageImage {
     aimage: AnnotationEditor,
     position: Point2i,
     render_cache: Option<RenderedMontageImage>,
-    options: MontageOptions,
 }
 
 #[allow(unused)]
@@ -43,7 +42,6 @@ impl MontageImage {
             aimage: AnnotationEditor::new(file_name),
             position: pos.clone(),
             render_cache: None,
-            options: Default::default(),
         }
     }
     fn move1(&mut self, p: &Point2i) {
@@ -59,29 +57,9 @@ impl MontageImage {
         *m.at_2d_mut::<f64>(0, 2)? = self.position.x as f64;
         *m.at_2d_mut::<f64>(1, 2)? = self.position.y as f64;
 
-        let mut image = Mat::default();
-        imgproc::warp_affine(
-            &self.aimage.image,
-            &mut image,
-            &m,
-            size,
-            INTER_LINEAR,
-            BORDER_CONSTANT,
-            Scalar::new(0.0, 0.0, 0.0, 0.0),
-        );
-        // let pt1 = Point2i::new(0, 0);
-        // let pt2 = self.position;
-        // let pt3 = Point2i::new(size.width, size.height);
-        // let color = Scalar::new(0., 255., 255., 255.);
-        // imgproc::line(&mut image, pt1, pt2, color, 8, LINE_8, 0);
-        // imgproc::line(&mut image, pt2, pt3, color, 8, LINE_8, 0);
-
-
-        
         self.render_cache = Some(RenderedMontageImage {
-            image: image,
-            // image: self.aimage.make_transformed_image(m,size),
-            dist_map: self.aimage.make_dist_map(m, size)?,
+            image: self.aimage.make_transformed_image(&m,size),
+            dist_map: self.aimage.make_dist_map(&m, size)?,
         });
 
         Ok(Some({}))
@@ -113,7 +91,8 @@ impl MontageImage {
     }
 
     fn set_show_boundaries(&mut self, show_boundaries: bool) {
-        self.options.show_boundaries=show_boundaries;
+        self.aimage.set_show_boundaries(show_boundaries);
+        self.render_cache=None;
     }
 }
 
@@ -228,8 +207,8 @@ impl Modification for MoveModification {
 }
 
 #[derive(Default)]
-struct MontageOptions {
-    show_boundaries: bool,
+pub struct MontageOptions {
+    pub show_boundaries: bool,
 }
 
 struct MontageEditor {
@@ -314,6 +293,7 @@ pub fn editor(file_name: &Vec<String>) -> Result<()> {
         if key == 'e' as i32 {
             // FIXME: ideally this should be emitting an event automatically
             editor.montage.toggle_show_boundaries();
+            println!("toggle-boundaries");
         }
         editor.montage.render()?;
         imshow(window, &editor.montage.render_buffer.as_ref().unwrap())?;

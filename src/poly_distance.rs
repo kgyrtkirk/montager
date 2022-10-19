@@ -1,8 +1,9 @@
 use opencv::core::*;
-use opencv::types::{VectorOfPoint2d};
+use opencv::types::{VectorOfPoint2d, VectorOfPoint};
 use opencv::*;
 
 
+// FIXME: this is ugly; might be better to do this differently?
 pub trait F64I32Bridge<B> {
     fn to_f64(self : Self) -> B;
 }
@@ -19,6 +20,16 @@ impl F64I32Bridge<Point2i> for Point2d {
     }
 }
 
+// FIXME: I can't template this yet...
+impl F64I32Bridge<VectorOfPoint> for VectorOfPoint2d {
+    fn to_f64(self : Self) -> VectorOfPoint {
+        let mut ret :VectorOfPoint = Vector::new();
+        for p in self {
+            ret.push(p.to_f64());
+        }
+        ret
+    }
+}
 
 pub trait PolyDist {
     fn dist(&self, p: &Point_<f64>) -> Result<f64>;

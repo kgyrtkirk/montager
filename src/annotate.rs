@@ -4,7 +4,7 @@ use opencv::{
     core::*,
     highgui::{self, imshow, resize_window, EVENT_LBUTTONDOWN, WINDOW_GUI_EXPANDED},
     imgcodecs,
-    imgproc::{self, convex_hull, LINE_8},
+    imgproc::{self, convex_hull, LINE_8, INTER_LINEAR},
     // prelude::*,
     types::{VectorOfPoint, VectorOfPoint2d},
 //    Result,
@@ -19,6 +19,7 @@ use crate::poly_distance::PolyDist;
 use crate::poly_distance::F64I32Bridge;
 
 
+
 #[allow(unused)]
 #[derive(Debug, Serialize, Deserialize)]
 struct OnDiskAnnotations {
@@ -31,6 +32,7 @@ pub struct AnnotationEditor {
     #[allow(unused)]
     file_name: String,
     pub image: Mat,
+    options : crate::montage::MontageOptions,
 }
 
 #[allow(unused)]
@@ -61,6 +63,7 @@ impl AnnotationEditor {
             annotation_file: annotation_file,
             file_name: file_name.clone(),
             image: image,
+            options: Default::default(),
         }
     }
     fn save(self: &AnnotationEditor) {
@@ -134,7 +137,7 @@ impl AnnotationEditor {
         self.points.push(point);
     }
 
-    pub(crate) fn make_dist_map(&self, m: Mat, size: Size_<i32>) -> Result<Mat> {
+    pub(crate) fn make_dist_map(&self, m: &Mat, size: Size_<i32>) -> Result<Mat> {
         let mut dist_map = Mat::zeros_size(size, CV_64F).unwrap().to_mat().unwrap();
 
         let mut pp : VectorOfPoint2d=self.hull()?;
@@ -149,6 +152,46 @@ impl AnnotationEditor {
             }
         }
         Ok(dist_map)
+    }
+
+    pub(crate) fn make_transformed_image(&self, m: &Mat, size: Size_<i32>) -> Mat {
+        let mut image = Mat::default();
+        imgproc::warp_affine(
+            &self.image,
+            &mut image,
+            &m,
+            size,
+            INTER_LINEAR,
+            BORDER_CONSTANT,
+            Scalar::new(0.0, 0.0, 0.0, 0.0),
+        );
+
+        if self.options.show_boundaries  {
+            let mut points : VectorOfPoint2d=self.hull().unwrap();
+            points.transform(&m);
+            let points = points.to_f64();
+            
+            for i in 1..points.len() {
+                let pt1=points.get(i - 1).unwrap();
+                let pt2=points.get(i + 0).unwrap();
+                let color = Scalar::new(255., 0., 255., 0.);
+                imgproc::line(
+                    &mut image,
+                    pt1,
+                   pt2,
+                    color,
+                    2,
+                    LINE_8,
+                    0,
+                ).unwrap();
+            }
+    }
+        
+        image
+    }
+
+    pub(crate) fn set_show_boundaries(&mut self, show_boundaries: bool)  {
+        self.options.show_boundaries=show_boundaries;
     }
 }
 
