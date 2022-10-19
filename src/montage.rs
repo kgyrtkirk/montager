@@ -1,6 +1,4 @@
-use std::{
-    sync::{Arc, Mutex},
-};
+use std::sync::{Arc, Mutex};
 
 use crate::annotate::AnnotationEditor;
 use color_eyre::Result;
@@ -58,7 +56,7 @@ impl MontageImage {
         *m.at_2d_mut::<f64>(1, 2)? = self.position.y as f64;
 
         self.render_cache = Some(RenderedMontageImage {
-            image: self.aimage.make_transformed_image(&m,size),
+            image: self.aimage.make_transformed_image(&m, size),
             dist_map: self.aimage.make_dist_map(&m, size)?,
         });
 
@@ -82,17 +80,13 @@ impl MontageImage {
             .image
             .at_2d::<Vec3b>(p.y, p.x)?;
         let a = q[0];
-        // q[0] as f32 ,q[1] as f32,q[2] as f32
         let r = Vec3d::from([q[0] as f64, q[1] as f64, q[2] as f64]) / 255.;
-        // let r=Point3d::new(1.,1.,1.);
-        // let r=Point3f::new(q[0] as f32 ,q[1] as f32,q[2] as f32);
-        // Ok(q.clone())
         Ok(r)
     }
 
     fn set_show_boundaries(&mut self, show_boundaries: bool) {
         self.aimage.set_show_boundaries(show_boundaries);
-        self.render_cache=None;
+        self.render_cache = None;
     }
 }
 
@@ -183,7 +177,7 @@ impl Montage {
         for i in &mut self.images {
             i.set_show_boundaries(self.options.show_boundaries);
         }
-}
+    }
 }
 
 struct MoveModification {

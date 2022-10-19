@@ -4,21 +4,19 @@ use opencv::{
     core::*,
     highgui::{self, imshow, resize_window, EVENT_LBUTTONDOWN, WINDOW_GUI_EXPANDED},
     imgcodecs,
-    imgproc::{self, convex_hull, LINE_8, INTER_LINEAR},
+    imgproc::{self, convex_hull, INTER_LINEAR, LINE_8},
     // prelude::*,
     types::{VectorOfPoint, VectorOfPoint2d},
-//    Result,
+    //    Result,
 };
 
 use color_eyre::Result;
 use serde::{Deserialize, Serialize};
 use serde_yaml::{self};
 
-use crate::poly_distance::Transform;
-use crate::poly_distance::PolyDist;
 use crate::poly_distance::F64I32Bridge;
-
-
+use crate::poly_distance::PolyDist;
+use crate::poly_distance::Transform;
 
 #[allow(unused)]
 #[derive(Debug, Serialize, Deserialize)]
@@ -32,7 +30,7 @@ pub struct AnnotationEditor {
     #[allow(unused)]
     file_name: String,
     pub image: Mat,
-    options : crate::montage::MontageOptions,
+    options: crate::montage::MontageOptions,
 }
 
 #[allow(unused)]
@@ -82,7 +80,7 @@ impl AnnotationEditor {
             convex_hull(points, &mut hull_points, true, true).unwrap();
             let mut hull_points2 = VectorOfPoint2d::new();
             for p in hull_points {
-                hull_points2.push(Point2d::new(p.x as f64,p.y as f64));
+                hull_points2.push(Point2d::new(p.x as f64, p.y as f64));
             }
 
             Ok(hull_points2)
@@ -140,14 +138,14 @@ impl AnnotationEditor {
     pub(crate) fn make_dist_map(&self, m: &Mat, size: Size_<i32>) -> Result<Mat> {
         let mut dist_map = Mat::zeros_size(size, CV_64F).unwrap().to_mat().unwrap();
 
-        let mut pp : VectorOfPoint2d=self.hull()?;
+        let mut pp: VectorOfPoint2d = self.hull()?;
         pp.transform(&m);
 
         for row in 0..size.height {
             for col in 0..size.width {
                 let p = Point2d::new(col as f64, row as f64);
-                let mut d=pp.dist(&p).unwrap();
-                d=d.max(0.0f64);
+                let mut d = pp.dist(&p).unwrap();
+                d = d.max(0.0f64);
                 *dist_map.at_2d_mut::<f64>(row, col).unwrap() = d;
             }
         }
@@ -166,32 +164,24 @@ impl AnnotationEditor {
             Scalar::new(0.0, 0.0, 0.0, 0.0),
         );
 
-        if self.options.show_boundaries  {
-            let mut points : VectorOfPoint2d=self.hull().unwrap();
+        if self.options.show_boundaries {
+            let mut points: VectorOfPoint2d = self.hull().unwrap();
             points.transform(&m);
             let points = points.to_f64();
-            
+
             for i in 1..points.len() {
-                let pt1=points.get(i - 1).unwrap();
-                let pt2=points.get(i + 0).unwrap();
+                let pt1 = points.get(i - 1).unwrap();
+                let pt2 = points.get(i + 0).unwrap();
                 let color = Scalar::new(255., 0., 255., 0.);
-                imgproc::line(
-                    &mut image,
-                    pt1,
-                   pt2,
-                    color,
-                    2,
-                    LINE_8,
-                    0,
-                ).unwrap();
+                imgproc::line(&mut image, pt1, pt2, color, 2, LINE_8, 0).unwrap();
             }
-    }
-        
+        }
+
         image
     }
 
-    pub(crate) fn set_show_boundaries(&mut self, show_boundaries: bool)  {
-        self.options.show_boundaries=show_boundaries;
+    pub(crate) fn set_show_boundaries(&mut self, show_boundaries: bool) {
+        self.options.show_boundaries = show_boundaries;
     }
 }
 

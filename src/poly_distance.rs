@@ -1,29 +1,28 @@
 use opencv::core::*;
-use opencv::types::{VectorOfPoint2d, VectorOfPoint};
+use opencv::types::{VectorOfPoint, VectorOfPoint2d};
 use opencv::*;
-
 
 // FIXME: this is ugly; might be better to do this differently?
 pub trait F64I32Bridge<B> {
-    fn to_f64(self : Self) -> B;
+    fn to_f64(self: Self) -> B;
 }
 
 impl F64I32Bridge<Point2d> for Point {
-    fn to_f64(self : Self) -> Point2d {
+    fn to_f64(self: Self) -> Point2d {
         Point2d::new(self.x as f64, self.y as f64)
     }
 }
 
 impl F64I32Bridge<Point2i> for Point2d {
-    fn to_f64(self : Self) -> Point2i {
+    fn to_f64(self: Self) -> Point2i {
         Point2i::new(self.x as i32, self.y as i32)
     }
 }
 
 // FIXME: I can't template this yet...
 impl F64I32Bridge<VectorOfPoint> for VectorOfPoint2d {
-    fn to_f64(self : Self) -> VectorOfPoint {
-        let mut ret :VectorOfPoint = Vector::new();
+    fn to_f64(self: Self) -> VectorOfPoint {
+        let mut ret: VectorOfPoint = Vector::new();
         for p in self {
             ret.push(p.to_f64());
         }
@@ -55,37 +54,33 @@ impl AbsMin for f64 {
     }
 }
 
-pub trait Transform  {
-    fn transform(&mut self, m: &Mat) ;
+pub trait Transform {
+    fn transform(&mut self, m: &Mat);
 }
 
 impl Transform for Point2d {
     fn transform(&mut self, m: &Mat) {
         // let a=Vec3d::from([pos.x as f64, pos.y as f64, 1.0]);
         // let p2=a.to_mat().unwrap();
-        let p2 = Mat::from_slice(&[self.x as f64, self.y as f64, 1.0]).unwrap().t().unwrap();
+        let p2 = Mat::from_slice(&[self.x as f64, self.y as f64, 1.0])
+            .unwrap()
+            .t()
+            .unwrap();
         let r = (m * p2).into_result().unwrap().to_mat().unwrap();
-        let a: Point2i = Point2i::new(*r.at::<f64>(0).unwrap() as i32, *r.at::<f64>(1).unwrap() as i32);
-        *self=Point2d::new(a.x as f64 , a.y as f64);
+        let a: Point2i = Point2i::new(
+            *r.at::<f64>(0).unwrap() as i32,
+            *r.at::<f64>(1).unwrap() as i32,
+        );
+        *self = Point2d::new(a.x as f64, a.y as f64);
     }
 }
 
 impl Transform for VectorOfPoint2d {
-
     fn transform(&mut self, m: &Mat) {
-
         for p in self.as_mut_slice() {
             p.transform(m);
         }
-        // // let a=Vec3d::from([pos.x as f64, pos.y as f64, 1.0]);
-        // // let p2=a.to_mat().unwrap();
-        // let p2 = Mat::from_slice(&[pos.x as f64, pos.y as f64, 1.0]).unwrap().t().unwrap();
-        // let r = (m * p2).into_result().unwrap().to_mat().unwrap();
-        // let a: Point2i = Point2i::new(*r.at::<f64>(0).unwrap() as i32, *r.at::<f64>(1).unwrap() as i32);
-        // a
     }
-
-
 }
 
 // FIXME: signed dist is only valid for convex polys
@@ -102,19 +97,18 @@ impl PolyDist for VectorOfPoint2d {
             let v = *p - p1;
             let vl = v.dot(n);
             if 0.0f64 <= vl && vl <= l {
-                dist.abs_min( &n.cross(v));
+                dist.abs_min(&n.cross(v));
             } else {
                 if vl <= 0.0f64 {
-                    dist.abs_min( &p.dist(&p1)?);
+                    dist.abs_min(&p.dist(&p1)?);
                 } else {
-                    dist.abs_min( &p.dist(&p2)?);
+                    dist.abs_min(&p.dist(&p2)?);
                 }
             }
         }
         Ok(dist)
     }
 }
-
 
 #[cfg(test)]
 mod tests {
