@@ -121,7 +121,7 @@ impl Montage {
         m.render();
         m
     }
-    fn render(&mut self) -> Result<()> {
+    fn render(&mut self) -> Result<Option<()>> {
         let mut changes = false;
         // how about an event instead?
         let mod_count: i32 = self
@@ -133,7 +133,7 @@ impl Montage {
             self.render_buffer = None;
         }
         if self.render_buffer.is_some() {
-            return Ok({});
+            return Ok(None);
         }
 
         let mut selfimage = Mat::new_size_with_default(self.size, CV_8UC3, Scalar::from(127))?;
@@ -169,7 +169,7 @@ impl Montage {
 
         self.render_buffer = Some(selfimage);
 
-        Ok({})
+        Ok(Some({}))
     }
 
     fn toggle_show_boundaries(&mut self) {
@@ -289,8 +289,10 @@ pub fn editor(file_name: &Vec<String>) -> Result<()> {
             editor.montage.toggle_show_boundaries();
             println!("toggle-boundaries");
         }
-        editor.montage.render()?;
-        imshow(window, &editor.montage.render_buffer.as_ref().unwrap())?;
+        if let Ok(Some(_x)) = editor.montage.render() {
+            imshow(window, &editor.montage.render_buffer.as_ref().unwrap())?;
+        }
+
     }
     Ok(())
 }
