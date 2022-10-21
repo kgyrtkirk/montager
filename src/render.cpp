@@ -83,5 +83,5 @@ void render(gint32 image_ID,
 
 	free(layers);
 
-	g_message("White-white?@!");
+	g_message("White-white?@!123");
 }

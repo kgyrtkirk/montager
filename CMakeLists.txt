@@ -32,8 +32,12 @@ set(montager_test_SRC ${core_SRC} "src/test.cpp")
 FIND_PACKAGE( Boost 1.40 COMPONENTS program_options log log_setup iostreams REQUIRED )
 INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIR} )
 
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(deps REQUIRED IMPORTED_TARGET glib-2.0)
+
 add_executable(montager ${montager_SRC})
 target_link_libraries(montager ${Boost_LIBRARIES} pthread util ${GIMP2_LIBS})
+target_link_libraries(montager PkgConfig::deps)
 
 add_executable(montager-test ${montager_test_SRC})
 target_link_libraries(montager-test ${Boost_LIBRARIES} pthread util ${GIMP2_LIBS})

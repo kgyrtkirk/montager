@@ -1,7 +1,6 @@
 
 #include <glib.h>
 
-
 #include <locale.h>
 
 typedef struct {
@@ -50,9 +49,9 @@ main (int argc, char *argv[])
               my_object_fixture_set_up, test_my_object_test2,
               my_object_fixture_tear_down);
 
-  g_test_add ("/my-object/test2", MyObjectFixture, "some-user-data",
-              my_object_fixture_set_up, test_my_object_test2,
-              my_object_fixture_tear_down);
+  // g_test_add ("/my-object/test2", MyObjectFixture, "some-user-data",
+  //             my_object_fixture_set_up, test_my_object_test2,
+  //             my_object_fixture_tear_down);
 
   return g_test_run ();
 }
