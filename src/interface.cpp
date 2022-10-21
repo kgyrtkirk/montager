@@ -83,7 +83,7 @@ dialog (gint32              image_ID,
   gimp_ui_init (PLUGIN_NAME, TRUE);
 
   dlg = gimp_dialog_new (_("GIMP Plug-In Template11"), PLUGIN_NAME,
-                         NULL, 0,
+                         NULL, (GtkDialogFlags)0,
 			 gimp_standard_help_func, "plug-in-template",
 
 			 GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
@@ -223,7 +223,7 @@ dialog (gint32              image_ID,
     {
       /*  Save ui values  */
       ui_state->chain_active =
-        gimp_chain_button_get_active (GIMP_COORDINATES_CHAINBUTTON (coordinates));
+        gimp_chain_button_get_active ((GimpChainButton*)GIMP_COORDINATES_CHAINBUTTON (coordinates));
     }
 
   gtk_widget_destroy (dlg);

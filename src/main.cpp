@@ -40,8 +40,8 @@
 
 /*  Constants  */
 
-#define PROCEDURE_NAME "gimp_plugin_template"
-#define PROCEDURE_NAME2 "gimp_plugin_template2"
+#define PROCEDURE_NAME "montager1"
+#define PROCEDURE_NAME2 "montager2"
 
 #define DATA_KEY_VALS "plug_in_template"
 #define DATA_KEY_UI_VALS "plug_in_template_ui"
@@ -126,7 +126,7 @@ query(void)
                          "Michael Natterer <mitch@gimp.org>",
                          "Michael Natterer <mitch@gimp.org>",
                          "2000-2004",
-                         N_("Plug-In Template..."),
+                         N_("Montager1..."),
                          "RGB*, GRAY*, INDEXED*",
                          GIMP_PLUGIN,
                          G_N_ELEMENTS(args), 0,
@@ -138,7 +138,7 @@ query(void)
                          "Michael Natterer <mitch@gimp.org>",
                          "Michael Natterer <mitch@gimp.org>",
                          "2000-2004",
-                         N_("Plug-In Template2..."),
+                         N_("montager2..."),
                          "RGB*, GRAY*, INDEXED*",
                          GIMP_PLUGIN,
                          G_N_ELEMENTS(args), 0,
@@ -171,7 +171,7 @@ run(const gchar *name,
 #endif
   textdomain(GETTEXT_PACKAGE);
 
-  run_mode = param[0].data.d_int32;
+  run_mode = (GimpRunMode)param[0].data.d_int32;
   image_ID = param[1].data.d_int32;
   drawable = gimp_drawable_get(param[2].data.d_drawable);
 
@@ -255,4 +255,3 @@ run(const gchar *name,
   values[0].data.d_status = status;
 }
 
-int main() {}

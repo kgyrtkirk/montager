@@ -10,7 +10,7 @@ endif
 
 # set standard values, if not set by default
 CXX ?= g++
-CXXFLAGS += -O3 -Wall
+CXXFLAGS += -O3 -Wall -fpermissive
 
 
 # project-specific flags
