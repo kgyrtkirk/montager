@@ -1,0 +1,10 @@
+#!/bin/bash
+set -e
+
+mkdir -p build2
+cd build2
+cmake ..
+make
+bin/montager-test
+cp bin/montager ~/.config/GIMP/2.10/plug-ins/montager/montager
+gimp-2.10 ../trial.xcf
