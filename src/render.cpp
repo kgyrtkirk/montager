@@ -7,8 +7,42 @@
 #include "main.h"
 #include "render.h"
 
+
+#include <iostream>
+
+#include <boost/geometry.hpp>
+#include <boost/geometry/geometries/polygon.hpp>
+#include <boost/geometry/geometries/adapted/boost_tuple.hpp>
+#include <boost/geometry.hpp>
+#include <boost/geometry/geometries/point_xy.hpp>
+#include <boost/geometry/geometries/polygon.hpp>
+#include <boost/geometry/multi/geometries/multi_point.hpp>
+
+BOOST_GEOMETRY_REGISTER_BOOST_TUPLE_CS(cs::cartesian)
+
+class Point {
+	int x;
+	int y;
+};
+
+class ConvexHull {
+	int last_x=0;
+
+public:
+	void add(int x,int y) {
+
+	}
+
+};
+
 void read_image(gint32 drawable_id)
 {
+    using boost::geometry::model::d2::point_xy;
+    using boost::geometry::append;
+    using boost::geometry::make;
+	
+	boost::geometry::model::multi_point<point_xy<int> > points;
+	
 	GimpDrawable *drawable = gimp_drawable_get(drawable_id);
 	gint bpp = drawable->bpp; //(drawable->drawable_id);
 	gint w = drawable->width;
@@ -18,17 +52,34 @@ void read_image(gint32 drawable_id)
 	gimp_pixel_rgn_init(&region, drawable, 0, 0, w, h, FALSE, FALSE);
 	size_t size = w * h * bpp;
 	guchar *img = (guchar *)g_malloc(size);
-	printf("maskbpp :%d %d\n", bpp, size);
+	// printf("maskbpp :%d %d\n", bpp, size);
 
 	gimp_pixel_rgn_get_rect(&region, img, 0, 0, w, h);
-	for (int i = 0; i < 10; i++)
-	{
-		for (int j = 0; j < 10; j++)
-		{
-			if (i * w + j < size)
-				img[i * w + j] = 255;
+
+	// for (int i = 0; i < 10; i++)
+	// {
+	// 	for (int j = 0; j < 10; j++)
+	// 	{
+	// 		if (i * w + j < size)
+	// 			img[i * w + j] = 255;
+	// 	}
+	// }
+
+	// ConvexHull hull;
+
+	for(int x=0;x<w;x++) {
+		for(int y=0;y<h;y++) {
+			if(img[y*w+x]>=255) {
+				append(points, make<point_xy<int> >(x,y));
+			}
 		}
 	}
+
+    boost::geometry::model::polygon<point_xy<int> > hull;
+    boost::geometry::convex_hull(points,hull);
+
+	using boost::geometry::dsv;
+	std::cout << dsv(hull) << std::endl;
 	// memset(img, 255, size);
 	gimp_pixel_rgn_init(&region, drawable, 0, 0, w, h, TRUE, TRUE);
 	gimp_pixel_rgn_set_rect(&region, img, 0, 0, w, h);
