@@ -121,7 +121,7 @@ dialog(gint32 image_ID,
   /*  gimp_coordinates_new() example  */
 
   frame = gimp_frame_new("A GimpCoordinates Widget\n"
-                           "Initialized with the Drawable's Size");
+                         "Initialized with the Drawable's Size");
   gtk_box_pack_start(GTK_BOX(main_vbox), frame, FALSE, FALSE, 0);
   gtk_widget_show(frame);
 

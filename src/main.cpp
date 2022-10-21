@@ -63,8 +63,6 @@ GimpPlugInInfo PLUG_IN_INFO =
         run,   /* run_proc   */
 };
 
-MAIN()
-
 static void
 query(void)
 {
@@ -218,3 +216,5 @@ run(const gchar *name,
   values[0].type = GIMP_PDB_STATUS;
   values[0].data.d_status = status;
 }
+
+MAIN()

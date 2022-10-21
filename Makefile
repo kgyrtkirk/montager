@@ -19,7 +19,8 @@ LDFLAGS += $(shell gimptool-2.0 --libs) -lstdc++
 
 # project data
 PLUGIN = montager
-SOURCES = $(wildcard src/*.cpp)
+SOURCES = src/interface.cpp  src/main.cpp  src/render.cpp
+TEST_SOURCES = src/interface.cpp  src/test.cpp  src/render.cpp
 HEADERS = $(wildcard src/*.h)
 
 # END CONFIG ##################################################################
@@ -32,6 +33,9 @@ OBJECTS = $(subst .cpp,.o,$(SOURCES))
 
 $(PLUGIN): $(OBJECTS)
 	echo src:$(SOURCES)
+	$(CXX) -o $@ $^ $(LDFLAGS)
+
+$(PLUGIN)-test: $(subst .cpp,.o,$(TEST_SOURCES))
 	$(CXX) -o $@ $^ $(LDFLAGS)
 
 %.o: %.cpp $(HEADERS)
