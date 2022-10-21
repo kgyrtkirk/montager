@@ -1,30 +1,3 @@
-/* GIMP Plug-in Template
- * Copyright (C) 2000  Michael Natterer <mitch@gimp.org> (the "Author").
- * All Rights Reserved.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the "Software"),
- * to deal in the Software without restriction, including without limitation
- * the rights to use, copy, modify, merge, publish, distribute, sublicense,
- * and/or sell copies of the Software, and to permit persons to whom the
- * Software is furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included
- * in all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
- * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
- * THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
- * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- * Except as contained in this notice, the name of the Author of the
- * Software shall not be used in advertising or otherwise to promote the
- * sale, use or other dealings in this Software without prior written
- * authorization from the Author.
- */
-
 #include "config.h"
 
 #include <string.h>
@@ -35,8 +8,6 @@
 #include "main.h"
 #include "interface.h"
 #include "render.h"
-
-#include "plugin-intl.h"
 
 /*  Constants  */
 
@@ -126,7 +97,7 @@ query(void)
                          "Michael Natterer <mitch@gimp.org>",
                          "Michael Natterer <mitch@gimp.org>",
                          "2000-2004",
-                         N_("Montager1..."),
+                         "Montager1...",
                          "RGB*, GRAY*, INDEXED*",
                          GIMP_PLUGIN,
                          G_N_ELEMENTS(args), 0,
@@ -138,7 +109,7 @@ query(void)
                          "Michael Natterer <mitch@gimp.org>",
                          "Michael Natterer <mitch@gimp.org>",
                          "2000-2004",
-                         N_("montager2..."),
+                         "montager2...",
                          "RGB*, GRAY*, INDEXED*",
                          GIMP_PLUGIN,
                          G_N_ELEMENTS(args), 0,
@@ -163,13 +134,6 @@ run(const gchar *name,
 
   *nreturn_vals = 1;
   *return_vals = values;
-
-  /*  Initialize i18n support  */
-  // bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
-#ifdef HAVE_BIND_TEXTDOMAIN_CODESET
-  bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");
-#endif
-  textdomain(GETTEXT_PACKAGE);
 
   run_mode = (GimpRunMode)param[0].data.d_int32;
   image_ID = param[1].data.d_int32;
@@ -229,15 +193,15 @@ run(const gchar *name,
   }
   else
   {
-	g_message(name);
+    g_message(name);
     status = GIMP_PDB_CALLING_ERROR;
   }
 
   if (status == GIMP_PDB_SUCCESS)
   {
-    gimp_image_undo_group_start (image_ID);
+    gimp_image_undo_group_start(image_ID);
     render(image_ID, drawable, &vals, &image_vals, &drawable_vals);
-    gimp_image_undo_group_end (image_ID);
+    gimp_image_undo_group_end(image_ID);
 
     if (run_mode != GIMP_RUN_NONINTERACTIVE)
       gimp_displays_flush();
@@ -254,4 +218,3 @@ run(const gchar *name,
   values[0].type = GIMP_PDB_STATUS;
   values[0].data.d_status = status;
 }
-
