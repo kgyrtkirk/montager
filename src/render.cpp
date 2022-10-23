@@ -64,9 +64,9 @@ void read_image(gint32 drawable_id)
 		for (auto x = 0; x < w; x++)
 		{
 			point_xy<int> p(x, y);
-//			double d = boost::geometry::distance(p, hull);
-			bool w=boost::geometry::within(p,hull);
-			double d=w?0.0:255;
+			double d = boost::geometry::distance(p, hull);
+			// bool w=boost::geometry::within(p,hull);
+			// double d=w?0.0:255;
 			guchar v;
 			if (d <= 0.0)
 				v = 255;
