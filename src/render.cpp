@@ -65,15 +65,14 @@ void read_image(gint32 drawable_id)
 		{
 			point_xy<int> p(x, y);
 			double d = boost::geometry::distance(p, hull);
-			// bool w=boost::geometry::within(p,hull);
-			// double d=w?0.0:255;
-			guchar v;
-			if (d <= 0.0)
-				v = 255;
-			else
-				v = std::max(0.0, 254.0 - d);
+			guchar	v;
+			if(d<=0.0) 
+				v=255;
+				else
+				v=std::max(0.0,254.0-d);
 			img[p.y() * w + p.x()] = v;
 		}
+
 	}
 
 	gimp_pixel_rgn_init(&region, drawable, 0, 0, w, h, TRUE, TRUE);
