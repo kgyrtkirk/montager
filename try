@@ -7,4 +7,4 @@ cmake ..
 make
 bin/montager-test
 cp bin/montager ~/.config/GIMP/2.10/plug-ins/montager/montager
-gimp-2.10 ../trial.xcf
+[ "$1" == "--live" ] && gimp-2.10 ../trial.xcf
