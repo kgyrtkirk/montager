@@ -175,6 +175,30 @@ public:
 			}
 		}
 	}
+	void show_hull()
+	{
+		gint w = drawable->width;
+		gint h = drawable->height;
+		guchar *img = this->img.get();
+
+		for (auto y = 0; y < h; y++)
+		{
+			for (auto x = 0; x < w; x++)
+			{
+				int v = img[y * w + x];
+				if (v >= 255)
+					continue;
+
+				point_xy<int> p(x, y);
+				if(within(p,local_hull)) {
+					v=254;
+				} else {
+					v=0;
+				}
+				img[y * w + x] = v;
+			}
+		}
+	}
 	void flush()
 	{
 		gint w = drawable->width;
@@ -209,9 +233,9 @@ public:
 	}
 	// this is a bit different than Voronoi diagram; but the concept is close-enough
 	// in this case the generators are not just points - but polygons
-	void assignVoronoi()
+	void assign_voronoi()
 	{
-		gimp_progress_set_text("assignVoronoi");
+		gimp_progress_set_text("assign_voronoi");
 		if (images.size() >= 254)
 		{
 			g_error("more images than supported");
@@ -241,7 +265,10 @@ public:
 	}
 	void show_hulls()
 	{
-		g_error("missing");
+		for (auto it = images.begin(); it != images.end(); it++)
+		{
+			it->show_hull();
+		}
 	}
 	void cleanup()
 	{
@@ -292,7 +319,7 @@ void render(gint32 image_ID, MontageMode mode)
 		montage.flush();
 		break;
 	case MontageMode::VORONOI:
-		montage.assignVoronoi();
+		montage.assign_voronoi();
 		montage.flush();
 		break;
 	case MontageMode::SHOW_HULLS:
