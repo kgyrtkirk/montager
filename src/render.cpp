@@ -35,21 +35,14 @@ class PImage
 		size_t size = w * h * bpp;
 		if (bpp != 1)
 		{
-			printf("bpp: %d\n", bpp);
-			// g_error("bpp is expected to be 1 at this point");
+			g_error("bpp is expected to be 1 at this point; however its: %d", bpp);
 		}
-			printf("rinit %d",size);
-			printf("rinit %d",__LINE__);
 		img = (guchar *)g_malloc(size);
-			printf("rinit %d",__LINE__);
 
 		GimpPixelRgn region;
-			printf("rinit %d",__LINE__);
 		gimp_pixel_rgn_init(&region, drawable, 0, 0, w, h, FALSE, FALSE);
-			printf("rinit %d",__LINE__);
 
 		gimp_pixel_rgn_get_rect(&region, img, 0, 0, w, h);
-			printf("end-get: %d\n", bpp);
 	}
 	void compute_hull()
 	{
