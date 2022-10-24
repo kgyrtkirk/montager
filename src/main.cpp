@@ -11,8 +11,9 @@
 
 /*  Constants  */
 
-#define PROCEDURE_NAME "montager1"
-#define PROCEDURE_NAME2 "montager2"
+#define PROCEDURE_SHOW_HULLS "show_hulls"
+#define PROCEDURE_COMPUTE_VORONOI "compute_voronoi"
+#define PROCEDURE_CLEANUP_MASKS "cleanup_masks"
 
 #define DATA_KEY_VALS "plug_in_template"
 #define DATA_KEY_UI_VALS "plug_in_template_ui"
@@ -89,32 +90,45 @@ query(void)
   // gimp_plugin_help_register ("http://developer.gimp.org/plug-in-template/help",
   //                            help_uri);
 
-  gimp_install_procedure(PROCEDURE_NAME,
-                         "Blurb",
+  gimp_install_procedure(PROCEDURE_SHOW_HULLS,
+                         "Shows the convex hulls of the layers",
                          "Help",
-                         "Michael Natterer <mitch@gimp.org>",
-                         "Michael Natterer <mitch@gimp.org>",
-                         "2000-2004",
-                         "Montager1...",
+                         "Zoltan Haindrich <kirk@rxd.hu>",
+                         "Zoltan Haindrich <kirk@rxd.hu>",
+                         "2022",
+                         "Show convex hulls",
                          "RGB*, GRAY*, INDEXED*",
                          GIMP_PLUGIN,
                          G_N_ELEMENTS(args), 0,
                          args, NULL);
 
-  gimp_install_procedure(PROCEDURE_NAME2,
-                         "Blurb",
+  gimp_install_procedure(PROCEDURE_COMPUTE_VORONOI,
+                         "Computes the Voronoi assignment of each layer based on the convex hull of the full opacity pixels in the layer mask",
                          "Help",
-                         "Michael Natterer <mitch@gimp.org>",
-                         "Michael Natterer <mitch@gimp.org>",
-                         "2000-2004",
-                         "montager2...",
+                         "Zoltan Haindrich <kirk@rxd.hu>",
+                         "Zoltan Haindrich <kirk@rxd.hu>",
+                         "2022",
+                         "Voronoi generation",
                          "RGB*, GRAY*, INDEXED*",
                          GIMP_PLUGIN,
                          G_N_ELEMENTS(args), 0,
                          args, NULL);
 
-  gimp_plugin_menu_register(PROCEDURE_NAME, "<Image>/Filters/Misc/");
-  gimp_plugin_menu_register(PROCEDURE_NAME2, "<Image>/Filters/Misc/");
+  gimp_install_procedure(PROCEDURE_CLEANUP_MASKS,
+                         "Cleans up the masks - so that the original area of importance is shown",
+                         "Help",
+                         "Zoltan Haindrich <kirk@rxd.hu>",
+                         "Zoltan Haindrich <kirk@rxd.hu>",
+                         "2022",
+                         "Cleanup masks",
+                         "RGB*, GRAY*, INDEXED*",
+                         GIMP_PLUGIN,
+                         G_N_ELEMENTS(args), 0,
+                         args, NULL);
+
+  gimp_plugin_menu_register(PROCEDURE_SHOW_HULLS, "<Image>/Filters/Montager/");
+  gimp_plugin_menu_register(PROCEDURE_COMPUTE_VORONOI, "<Image>/Filters/Montager/");
+  gimp_plugin_menu_register(PROCEDURE_CLEANUP_MASKS, "<Image>/Filters/Montager/");
 }
 
 static void
@@ -143,75 +157,25 @@ run(const gchar *name,
   drawable_vals = default_drawable_vals;
   ui_vals = default_ui_vals;
 
-  if (strcmp(name, PROCEDURE_NAME) == 0)
+  gimp_image_undo_group_start(image_ID);
+  if (strcmp(name, PROCEDURE_SHOW_HULLS) == 0)
   {
-    switch (run_mode)
-    {
-    case GIMP_RUN_NONINTERACTIVE:
-      if (n_params != 8)
-      {
-        status = GIMP_PDB_CALLING_ERROR;
-      }
-      else
-      {
-        vals.dummy1 = param[3].data.d_int32;
-        vals.dummy2 = param[4].data.d_int32;
-        vals.dummy3 = param[5].data.d_int32;
-        vals.seed = param[6].data.d_int32;
-        vals.random_seed = param[7].data.d_int32;
-
-        if (vals.random_seed)
-          vals.seed = g_random_int();
-      }
-      break;
-
-    case GIMP_RUN_INTERACTIVE:
-      /*  Possibly retrieve data  */
-      gimp_get_data(DATA_KEY_VALS, &vals);
-      gimp_get_data(DATA_KEY_UI_VALS, &ui_vals);
-
-      // if (!dialog(image_ID, drawable,
-      //             &vals, &image_vals, &drawable_vals, &ui_vals))
-      // {
-      //   status = GIMP_PDB_CANCEL;
-      // }
-      break;
-
-    case GIMP_RUN_WITH_LAST_VALS:
-      /*  Possibly retrieve data  */
-      gimp_get_data(DATA_KEY_VALS, &vals);
-
-      if (vals.random_seed)
-        vals.seed = g_random_int();
-      break;
-
-    default:
-      break;
-    }
+    render(image_ID, MontageMode::SHOW_HULLS);
   }
-  else
+  if (strcmp(name, PROCEDURE_COMPUTE_VORONOI) == 0)
   {
-    g_message(name);
-    status = GIMP_PDB_CALLING_ERROR;
+    render(image_ID, MontageMode::VORONOI);
   }
-
-  if (status == GIMP_PDB_SUCCESS)
+  if (strcmp(name, PROCEDURE_CLEANUP_MASKS) == 0)
   {
-    gimp_image_undo_group_start(image_ID);
-    render(image_ID, drawable, &vals, &image_vals, &drawable_vals);
-    gimp_image_undo_group_end(image_ID);
-
-    if (run_mode != GIMP_RUN_NONINTERACTIVE)
-      gimp_displays_flush();
-
-    if (run_mode == GIMP_RUN_INTERACTIVE)
-    {
-      gimp_set_data(DATA_KEY_VALS, &vals, sizeof(vals));
-      gimp_set_data(DATA_KEY_UI_VALS, &ui_vals, sizeof(ui_vals));
-    }
-
-    gimp_drawable_detach(drawable);
+    render(image_ID, MontageMode::CLEANUP_MASKS);
   }
+  gimp_image_undo_group_end(image_ID);
+
+  if (run_mode != GIMP_RUN_NONINTERACTIVE)
+    gimp_displays_flush();
+
+  gimp_drawable_detach(drawable);
 
   values[0].type = GIMP_PDB_STATUS;
   values[0].data.d_status = status;

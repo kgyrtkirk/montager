@@ -74,12 +74,22 @@ private:
 		translate_transformer<int, 2, 2> translate(pos.x(), pos.y());
 		transform(local_hull, hull, translate);
 	}
-	void extract_drawable_infos(gint32 drawable_id){
+	void extract_drawable_infos(gint32 drawable_id)
+	{
 		drawable = gimp_drawable_get(drawable_id);
 		gint x, y;
 		gimp_drawable_offsets(drawable->drawable_id, &x, &y);
-		pos=point_xy<int>(x,y);
+		pos = point_xy<int>(x, y);
 	}
+	void safe_paint(int x, int y, int v)
+	{
+		guchar *p = &img.get()[y * drawable->width + x];
+		if (*p < 255)
+		{
+			*p = v;
+		}
+	}
+
 public:
 	PImage(gint32 drawable_id)
 	{
@@ -111,9 +121,11 @@ public:
 		if (0 <= x && x < drawable->width &&
 			0 <= y && y < drawable->height)
 		{
-			img.get()[y * drawable->width + x] = 255;
-		} else {
-			//gimp_drawable_get_name(layers[i]);
+			safe_paint(x, y, 254);
+		}
+		else
+		{
+			// gimp_drawable_get_name(layers[i]);
 			g_warning_once("Belonging point available canvas!");
 		}
 	}
@@ -145,6 +157,23 @@ public:
 	{
 		using boost::geometry::dsv;
 		std::cout << dsv(hull) << std::endl;
+	}
+	void cleanup()
+	{
+		gint w = drawable->width;
+		gint h = drawable->height;
+		guchar *img = this->img.get();
+
+		for (auto y = 0; y < h; y++)
+		{
+			for (auto x = 0; x < w; x++)
+			{
+				int v = img[y * w + x];
+				if (v < 255)
+					v = 0;
+				img[y * w + x] = v;
+			}
+		}
 	}
 	void flush()
 	{
@@ -210,11 +239,21 @@ public:
 			}
 		}
 	}
+	void show_hulls()
+	{
+		g_error("missing");
+	}
+	void cleanup()
+	{
+		for (auto it = images.begin(); it != images.end(); it++)
+		{
+			it->cleanup();
+		}
+	}
 	void flush()
 	{
 		for (auto it = images.begin(); it != images.end(); it++)
 		{
-
 			// 	it->show_distance();
 			it->flush();
 		}
@@ -222,13 +261,8 @@ public:
 };
 
 /*  Public functions  */
-void render(gint32 image_ID,
-			GimpDrawable *drawable,
-			PlugInVals *vals,
-			PlugInImageVals *image_vals,
-			PlugInDrawableVals *drawable_vals)
+void render(gint32 image_ID, MontageMode mode)
 {
-
 	gimp_progress_init(PLUGIN_NAME);
 
 	int num_layers;
@@ -251,8 +285,24 @@ void render(gint32 image_ID,
 		montage.add(mi);
 	}
 
-	montage.assignVoronoi();
-	montage.flush();
+	switch (mode)
+	{
+	case MontageMode::CLEANUP_MASKS:
+		montage.cleanup();
+		montage.flush();
+		break;
+	case MontageMode::VORONOI:
+		montage.assignVoronoi();
+		montage.flush();
+		break;
+	case MontageMode::SHOW_HULLS:
+		montage.show_hulls();
+		montage.flush();
+		break;
+	default:
+		g_error("unhandled switch branch");
+		break;
+	}
 
 	// get shape:
 	// * get_mask
@@ -268,4 +318,5 @@ void render(gint32 image_ID,
 	free(layers);
 
 	g_message("White-white?@!123");
+	gimp_progress_end();
 }
