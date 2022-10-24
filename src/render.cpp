@@ -126,7 +126,7 @@ public:
 		else
 		{
 			// gimp_drawable_get_name(layers[i]);
-			g_warning_once("Belonging point available canvas!");
+			g_warning_once("Belonging point not available on canvas!");
 		}
 	}
 	void show_distance()
@@ -299,8 +299,19 @@ void render(gint32 image_ID, MontageMode mode)
 	for (int i = 0; i < num_layers; i++)
 	{
 		gint32 layer = layers[i];
+		if(!gimp_drawable_get_visible(layer)){
+			continue;
+		}
+		if(!gimp_layer_get_mask(layer)){
+			continue;
+		}
 		gchar *name = gimp_drawable_get_name(layers[i]);
 		gint32 mask = gimp_layer_get_mask(layers[i]);
+		printf("mask: %d",mask);
+		if(mask<0) {
+			// ignore; no mask!
+			continue;
+		}
 
 		gimp_progress_set_text(name);
 		gimp_progress_update(i * 1.0 / num_layers);
