@@ -21,12 +21,17 @@ using namespace boost::geometry;
 using boost::geometry::model::multi_point;
 using boost::geometry::model::polygon;
 using boost::geometry::model::d2::point_xy;
+using namespace boost::geometry::strategy::transform;
+using std::shared_ptr;
 
 class PImage
 {
 	GimpDrawable *drawable;
-	guchar *img;
+	shared_ptr<guchar> img;
+	polygon<point_xy<int>> local_hull;
 	polygon<point_xy<int>> hull;
+
+private:
 	void read_image()
 	{
 		gint bpp = drawable->bpp;
@@ -37,12 +42,12 @@ class PImage
 		{
 			g_error("bpp is expected to be 1 at this point; however its: %d", bpp);
 		}
-		img = (guchar *)g_malloc(size);
-
+		shared_ptr<guchar> p0((guchar *)g_malloc(size));
+		img = p0;
+		
 		GimpPixelRgn region;
 		gimp_pixel_rgn_init(&region, drawable, 0, 0, w, h, FALSE, FALSE);
-
-		gimp_pixel_rgn_get_rect(&region, img, 0, 0, w, h);
+		gimp_pixel_rgn_get_rect(&region, img.get(), 0, 0, w, h);
 	}
 	void compute_hull()
 	{
@@ -50,6 +55,7 @@ class PImage
 		gint w = drawable->width;
 		gint h = drawable->height;
 
+		guchar* img = this->img.get();
 		for (int x = 0; x < w; x++)
 		{
 			for (int y = 0; y < h; y++)
@@ -61,9 +67,14 @@ class PImage
 			}
 		}
 
-		convex_hull(points, hull);
-		using boost::geometry::dsv;
-		std::cout << dsv(hull) << std::endl;
+		convex_hull(points, local_hull);
+
+		// make global hull
+		gint x, y;
+		gimp_drawable_offsets(drawable->drawable_id, &x, &y);
+
+		translate_transformer<int, 2, 2> translate(x, y);
+		transform(local_hull, hull, translate);
 	}
 
 public:
@@ -73,11 +84,18 @@ public:
 		read_image();
 		compute_hull();
 	};
+	PImage(const PImage &other)
+	{
+		drawable=gimp_drawable_get(other.drawable->drawable_id);
+		img=other.img;
+		local_hull=other.local_hull;
+		hull=other.hull;
+	};
 
 	~PImage()
 	{
 		gimp_drawable_detach(drawable);
-		g_free(img);
+		// g_free(img);
 	}
 
 	void show_distance()
@@ -85,6 +103,7 @@ public:
 		gint bpp = drawable->bpp;
 		gint w = drawable->width;
 		gint h = drawable->height;
+		guchar* img = this->img.get();
 
 		size_t size = w * h * bpp;
 		memset(img, 0, size);
@@ -93,7 +112,7 @@ public:
 			for (auto x = 0; x < w; x++)
 			{
 				point_xy<int> p(x, y);
-				double d = boost::geometry::distance(p, hull);
+				double d = boost::geometry::distance(p, local_hull);
 				guchar v;
 				if (d <= 0.0)
 					v = 255;
@@ -103,6 +122,11 @@ public:
 			}
 		}
 	}
+	void debug()
+	{
+		using boost::geometry::dsv;
+		std::cout << dsv(hull) << std::endl;
+	}
 	void flush()
 	{
 		gint w = drawable->width;
@@ -110,7 +134,7 @@ public:
 
 		GimpPixelRgn region;
 		gimp_pixel_rgn_init(&region, drawable, 0, 0, w, h, TRUE, TRUE);
-		gimp_pixel_rgn_set_rect(&region, img, 0, 0, w, h);
+		gimp_pixel_rgn_set_rect(&region, img.get(), 0, 0, w, h);
 		gimp_drawable_flush(drawable);
 		gimp_drawable_merge_shadow(drawable->drawable_id, TRUE);
 		gimp_drawable_update(drawable->drawable_id, 0, 0, w, h);
@@ -126,30 +150,31 @@ void render(gint32 image_ID,
 			PlugInDrawableVals *drawable_vals)
 {
 
+	gimp_progress_init(PLUGIN_NAME);
+
 	int num_layers;
 	gint *layers = gimp_image_get_layers(image_ID, &num_layers);
-	// gimp_image_get_layer_position
 
+	std::vector<PImage>	images;
 	for (int i = 0; i < num_layers; i++)
 	{
+
 		gint32 layer = layers[i];
 		gchar *name = gimp_drawable_get_name(layers[i]);
 		gint32 mask = gimp_layer_get_mask(layers[i]);
-		gint x, y;
-		// gimp_pixel_rgn_get_rect
-		// gimp_pixel
-		gimp_drawable_offsets(layer, &x, &y);
-		gimp_drawable_offsets(mask, &x, &y);
-		printf("name: %s  ; mask :%d  @%d,%d\n", name, mask, x, y);
-		g_message(name);
+
+		gimp_progress_set_text(name);
+		gimp_progress_update(i * 1.0 / num_layers);
 
 		PImage mi(mask);
-		mi.show_distance();
-		mi.flush();
-		//		read_image(layer);
-		// gimp_drawable_get_pixel
-		// gimp_drawable_get
+		mi.debug();
+		// mi.show_distance();
+		// mi.flush();
+		images.push_back(mi);
 	}
+
+	// for(auto it=images.begin(); it)
+
 
 	// get shape:
 	// * get_mask

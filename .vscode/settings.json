@@ -3,6 +3,7 @@
         "random": "cpp",
         "limits": "cpp",
         "ranges": "cpp",
-        "algorithm": "cpp"
+        "algorithm": "cpp",
+        "*.tcc": "cpp"
     }
 }
