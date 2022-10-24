@@ -44,7 +44,7 @@ private:
 		}
 		shared_ptr<guchar> p0((guchar *)g_malloc(size));
 		img = p0;
-		
+
 		GimpPixelRgn region;
 		gimp_pixel_rgn_init(&region, drawable, 0, 0, w, h, FALSE, FALSE);
 		gimp_pixel_rgn_get_rect(&region, img.get(), 0, 0, w, h);
@@ -55,7 +55,7 @@ private:
 		gint w = drawable->width;
 		gint h = drawable->height;
 
-		guchar* img = this->img.get();
+		guchar *img = this->img.get();
 		for (int x = 0; x < w; x++)
 		{
 			for (int y = 0; y < h; y++)
@@ -86,10 +86,10 @@ public:
 	};
 	PImage(const PImage &other)
 	{
-		drawable=gimp_drawable_get(other.drawable->drawable_id);
-		img=other.img;
-		local_hull=other.local_hull;
-		hull=other.hull;
+		drawable = gimp_drawable_get(other.drawable->drawable_id);
+		img = other.img;
+		local_hull = other.local_hull;
+		hull = other.hull;
 	};
 
 	~PImage()
@@ -103,7 +103,7 @@ public:
 		gint bpp = drawable->bpp;
 		gint w = drawable->width;
 		gint h = drawable->height;
-		guchar* img = this->img.get();
+		guchar *img = this->img.get();
 
 		size_t size = w * h * bpp;
 		memset(img, 0, size);
@@ -155,7 +155,7 @@ void render(gint32 image_ID,
 	int num_layers;
 	gint *layers = gimp_image_get_layers(image_ID, &num_layers);
 
-	std::vector<PImage>	images;
+	std::vector<PImage> images;
 	for (int i = 0; i < num_layers; i++)
 	{
 
@@ -174,7 +174,6 @@ void render(gint32 image_ID,
 	}
 
 	// for(auto it=images.begin(); it)
-
 
 	// get shape:
 	// * get_mask
