@@ -30,6 +30,7 @@ class PImage
 	shared_ptr<guchar> img;
 	polygon<point_xy<int>> local_hull;
 	polygon<point_xy<int>> hull;
+	point_xy<int> pos;
 
 private:
 	void read_image()
@@ -70,23 +71,25 @@ private:
 		convex_hull(points, local_hull);
 
 		// make global hull
-		gint x, y;
-		gimp_drawable_offsets(drawable->drawable_id, &x, &y);
-
-		translate_transformer<int, 2, 2> translate(x, y);
+		translate_transformer<int, 2, 2> translate(pos.x(), pos.y());
 		transform(local_hull, hull, translate);
 	}
-
+	void extract_drawable_infos(gint32 drawable_id){
+		drawable = gimp_drawable_get(drawable_id);
+		gint x, y;
+		gimp_drawable_offsets(drawable->drawable_id, &x, &y);
+		pos=point_xy<int>(x,y);
+	}
 public:
 	PImage(gint32 drawable_id)
 	{
-		drawable = gimp_drawable_get(drawable_id);
+		extract_drawable_infos(drawable_id);
 		read_image();
 		compute_hull();
 	};
 	PImage(const PImage &other)
 	{
-		drawable = gimp_drawable_get(other.drawable->drawable_id);
+		extract_drawable_infos(other.drawable->drawable_id);
 		img = other.img;
 		local_hull = other.local_hull;
 		hull = other.hull;
@@ -95,9 +98,25 @@ public:
 	~PImage()
 	{
 		gimp_drawable_detach(drawable);
-		// g_free(img);
 	}
 
+	double distance(const point_xy<int> &p) const
+	{
+		return boost::geometry::distance(p, hull);
+	}
+	double paint(const point_xy<int> &p)
+	{
+		int x = p.x() - pos.x();
+		int y = p.y() - pos.y();
+		if (0 <= x && x < drawable->width &&
+			0 <= y && y < drawable->height)
+		{
+			img.get()[y * drawable->width + x] = 255;
+		} else {
+			//gimp_drawable_get_name(layers[i]);
+			g_warning_once("Belonging point available canvas!");
+		}
+	}
 	void show_distance()
 	{
 		gint bpp = drawable->bpp;
@@ -141,8 +160,68 @@ public:
 	}
 };
 
-/*  Public functions  */
+class PMontage
+{
+	std::vector<PImage> images;
+	gint32 image_id;
+	gint32 width;
+	gint32 height;
 
+public:
+	PMontage(gint32 _image_id) : image_id(_image_id)
+	{
+
+		width = gimp_image_width(image_id);
+		height = gimp_image_height(image_id);
+	}
+	void add(const PImage &image)
+	{
+		images.push_back(image);
+	}
+	// this is a bit different than Voronoi diagram; but the concept is close-enough
+	// in this case the generators are not just points - but polygons
+	void assignVoronoi()
+	{
+		gimp_progress_set_text("assignVoronoi");
+		if (images.size() >= 254)
+		{
+			g_error("more images than supported");
+		}
+		guchar *aimg = (guchar *)malloc(width * height);
+
+		for (int y = 0; y < height; y++)
+		{
+			gimp_progress_update(y * 1.0 / height);
+			for (int x = 0; x < width; x++)
+			{
+				point_xy<int> p(x, y);
+				double minDist = std::numeric_limits<double>::max();
+				int minPos = -1;
+				for (int i = 0; i < images.size(); i++)
+				{
+					double d = images[i].distance(p);
+					if (d < minDist)
+					{
+						minPos = i;
+						minDist = d;
+					}
+				}
+				images[minPos].paint(p);
+			}
+		}
+	}
+	void flush()
+	{
+		for (auto it = images.begin(); it != images.end(); it++)
+		{
+
+			// 	it->show_distance();
+			it->flush();
+		}
+	}
+};
+
+/*  Public functions  */
 void render(gint32 image_ID,
 			GimpDrawable *drawable,
 			PlugInVals *vals,
@@ -155,10 +234,9 @@ void render(gint32 image_ID,
 	int num_layers;
 	gint *layers = gimp_image_get_layers(image_ID, &num_layers);
 
-	std::vector<PImage> images;
+	PMontage montage(image_ID);
 	for (int i = 0; i < num_layers; i++)
 	{
-
 		gint32 layer = layers[i];
 		gchar *name = gimp_drawable_get_name(layers[i]);
 		gint32 mask = gimp_layer_get_mask(layers[i]);
@@ -170,10 +248,11 @@ void render(gint32 image_ID,
 		mi.debug();
 		// mi.show_distance();
 		// mi.flush();
-		images.push_back(mi);
+		montage.add(mi);
 	}
 
-	// for(auto it=images.begin(); it)
+	montage.assignVoronoi();
+	montage.flush();
 
 	// get shape:
 	// * get_mask

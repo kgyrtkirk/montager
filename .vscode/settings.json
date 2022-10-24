@@ -4,6 +4,8 @@
         "limits": "cpp",
         "ranges": "cpp",
         "algorithm": "cpp",
-        "*.tcc": "cpp"
+        "*.tcc": "cpp",
+        "typeinfo": "cpp",
+        "iterator": "cpp"
     }
 }
