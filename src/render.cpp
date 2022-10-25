@@ -190,10 +190,13 @@ public:
 					continue;
 
 				point_xy<int> p(x, y);
-				if(within(p,local_hull)) {
-					v=254;
-				} else {
-					v=0;
+				if (within(p, local_hull))
+				{
+					v = 254;
+				}
+				else
+				{
+					v = 0;
 				}
 				img[y * w + x] = v;
 			}
@@ -244,7 +247,7 @@ public:
 
 		for (int y = 0; y < height; y++)
 		{
-			gimp_progress_update(y * 1.0 / height);
+			gimp_progress_update(((double)y) / height);
 			for (int x = 0; x < width; x++)
 			{
 				point_xy<int> p(x, y);
@@ -299,16 +302,19 @@ void render(gint32 image_ID, MontageMode mode)
 	for (int i = 0; i < num_layers; i++)
 	{
 		gint32 layer = layers[i];
-		if(!gimp_drawable_get_visible(layer)){
+		if (!gimp_drawable_get_visible(layer))
+		{
 			continue;
 		}
-		if(!gimp_layer_get_mask(layer)){
+		if (!gimp_layer_get_mask(layer))
+		{
 			continue;
 		}
 		gchar *name = gimp_drawable_get_name(layers[i]);
 		gint32 mask = gimp_layer_get_mask(layers[i]);
-		printf("mask: %d",mask);
-		if(mask<0) {
+		printf("mask: %d", mask);
+		if (mask < 0)
+		{
 			// ignore; no mask!
 			continue;
 		}
