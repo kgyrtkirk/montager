@@ -248,9 +248,16 @@ public:
 		for (int y = 0; y < height; y++)
 		{
 			gimp_progress_update(((double)y) / height);
-			for (int x = 0; x < width; x++)
+			for (int x0 = 0; x0 < width; x0++)
 			{
+				int x=(y&1) ? width-1-x0 : x0;
+				// snake-alike space filling curve; do provide |p-p'|=1 invariant
 				point_xy<int> p(x, y);
+
+
+
+				
+				
 				double minDist = std::numeric_limits<double>::max();
 				int minPos = -1;
 				for (int i = 0; i < images.size(); i++)

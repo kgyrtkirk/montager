@@ -8,4 +8,4 @@ This project was created to make the process easier and possibly create better m
 This is my first Rust project as well - and as such it may contain misuses of the language/etc :D
 
 testrun1:	8000x5000	~30 image
-18:05 ~
+18:05 ~ 22:00 ~ 25%

@@ -1,10 +1,9 @@
 
 // #include <glib.h>
 // #include </usr/include/glib-2.0/glib/gtestutils.h>
+#include "config.h"
 #include <glib.h>
-
-
-#include <locale.h>
+#include "dist_queue.h"
 
 typedef struct {
 //   OtherObject *helper;
@@ -26,6 +25,7 @@ static void
 test_my_object_test1 (MyObjectFixture *fixture,
                       gconstpointer user_data)
 {
+  dist_queue dq;
 //   g_assert_cmpstr (my_object_get_property (fixture->obj), ==, "initial-value");
 }
 

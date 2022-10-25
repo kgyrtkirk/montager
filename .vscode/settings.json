@@ -6,6 +6,7 @@
         "algorithm": "cpp",
         "*.tcc": "cpp",
         "typeinfo": "cpp",
-        "iterator": "cpp"
+        "iterator": "cpp",
+        "string_view": "cpp"
     }
 }

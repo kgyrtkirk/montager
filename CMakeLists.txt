@@ -6,7 +6,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "bin/")
 execute_process(COMMAND gimptool-2.0 --cflags OUTPUT_VARIABLE GIMP2_CFLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
 execute_process(COMMAND gimptool-2.0 --libs OUTPUT_VARIABLE GIMP2_LIBS OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-set(CMAKE_CXX_FLAGS "-Wall -O0 -Wextra -g -ggdb3 -std=c++11 ${CMAKE_CXX_FLAGS} ${GIMP2_CFLAGS}")
+set(CMAKE_CXX_FLAGS "-Wall -O0 -Wextra -g -ggdb3 -std=c++14 ${CMAKE_CXX_FLAGS} ${GIMP2_CFLAGS}")
 add_definitions(-DBOOST_LOG_DYN_LINK)
 
 # Configure CCache if available
@@ -41,6 +41,9 @@ target_link_libraries(montager PkgConfig::deps)
 
 add_executable(montager-test ${montager_test_SRC})
 target_link_libraries(montager-test ${Boost_LIBRARIES} pthread util ${GIMP2_LIBS})
+target_link_libraries(montager-test PkgConfig::deps)
+
+
 
 
 
