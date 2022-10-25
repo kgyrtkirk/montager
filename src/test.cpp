@@ -25,8 +25,25 @@ static void
 test_my_object_test1 (MyObjectFixture *fixture,
                       gconstpointer user_data)
 {
-  dist_queue dq;
-//   g_assert_cmpstr (my_object_get_property (fixture->obj), ==, "initial-value");
+    t_polygon poly;
+    t_polygon poly2;
+    boost::geometry::read_wkt("POLYGON((0 0,1 1,1 0))", poly);
+    boost::geometry::read_wkt("POLYGON((10 0,11 1,11 0))", poly2);
+
+    dist_queue a;
+
+    dist_queue::entry e1 = dist_queue::entry(shared_ptr<t_polygon>(&poly));
+    dist_queue::entry e2 = dist_queue::entry(shared_ptr<t_polygon>(&poly2));
+    a.add(&e1);
+    a.add(&e2);
+
+    for (int x = 0; x < 11; x++)
+    {
+        printf("%d >\n",x);
+        t_point p(x, 0);
+        a.min(p);
+    }
+    // a.add(2);
 }
 
 static void
