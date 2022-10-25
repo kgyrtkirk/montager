@@ -28,16 +28,19 @@ class dist_queue
 {
     class entry
     {
-
-        const t_polygon &g;
+        shared_ptr<t_polygon> g;
 
     public:
-        entry(const t_polygon &_g) : g(_g)
+        entry(shared_ptr<t_polygon> _g) : g(_g)
         {
         }
         entry(const entry &e) : g(e.g)
         {
         }
+        // entry& operator=(const entry&o) {
+        //     g=o.g;
+        //     return *this;
+        // }
     };
 
     class entry_cmp
@@ -54,7 +57,7 @@ public:
     std::priority_queue<entry, std::vector<entry>, entry_cmp> queue;
     dist_queue(){};
 
-    void add(const t_polygon &g)
+    void add(shared_ptr<t_polygon> g)
     {
         queue.push(entry(g));
     }
@@ -70,7 +73,7 @@ void a()
         poly);
 
     dist_queue a;
-    a.add(poly);
+    a.add(shared_ptr<t_polygon>(&poly));
     // a.add(2);
 }
 
