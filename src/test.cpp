@@ -32,15 +32,15 @@ test_my_object_test1 (MyObjectFixture *fixture,
 
     dist_queue a;
 
-    dist_queue::entry e1 = dist_queue::entry(shared_ptr<t_polygon>(&poly));
-    dist_queue::entry e2 = dist_queue::entry(shared_ptr<t_polygon>(&poly2));
+    dist_queue::entry e1 = dist_queue::entry(poly);
+    dist_queue::entry e2 = dist_queue::entry(poly2);
     a.add(&e1);
     a.add(&e2);
 
     for (int x = 0; x < 11; x++)
     {
         printf("%d >\n",x);
-        t_point p(x, 0);
+        t_point p(x, 10);
         a.min(p);
     }
     // a.add(2);

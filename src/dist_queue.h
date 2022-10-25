@@ -31,29 +31,28 @@ public:
     {
 
     public:
-        shared_ptr<t_polygon> g;
+        t_polygon g;
         t_point last_point;
         double last_dist;
         double heur_dist;
         int index = 0;
 
-        entry(shared_ptr<t_polygon> _g) : g(_g)
+        entry(t_polygon _g) : g(_g)
         {
             update(t_point(0,0),0);
         }
-        entry(const entry &e) : g(e.g)
-        {
-            printf(" entry(const entry&e)\n");
-        }
+        // entry(const entry &e) : g(e.g)
+        // {
+        //     printf(" entry(const entry&e)\n");
+        // }
         // entry& operator=(const entry&o) {
         //     g=o.g;
         //     return *this;
         // }
         void update(const t_point&p,int _index) {
             last_point=p;
-            t_point pp=p;
-            t_polygon poly;
-            last_dist=boost::geometry::distance(pp, *g.get());
+            last_dist=boost::geometry::distance(last_point, g);
+            // printf("up: %d %d => %f\n",p.x(),p.y(),last_dist);
             index=_index;
             heur_dist=last_dist+index;
         }
@@ -67,9 +66,9 @@ public:
         {
             if (l->heur_dist != r->heur_dist)
             {
-                return l->heur_dist < r->heur_dist;
+                return l->heur_dist > r->heur_dist;
             }
-            return l->index < r->index;
+            return l->index > r->index;
         }
     };
 
@@ -82,42 +81,19 @@ public:
     }
 
     int idx=0;
-    void min(const t_point &p)
+    void min(t_point p)
     {
         entry*curr=queue.top();
-        while(p.x()!=curr->last_point.x() || p.y()!=curr->last_point.y()) {
-            entry*curr=queue.top();
+        while( (p.x()!=curr->last_point.x()) || (p.y()!=curr->last_point.y())) {
             queue.pop(); // !#@$ why can't this return the top element?
 
             curr->update( p,idx);
             queue.push(curr);
+
+            curr=queue.top();
         }
         idx++;
     }
 };
-
-void a()
-{
-
-    t_polygon poly;
-    t_polygon poly2;
-    boost::geometry::read_wkt("POLYGON((0 0,1 1,1 0))", poly);
-    boost::geometry::read_wkt("POLYGON((10 0,11 1,11 0))", poly2);
-
-    dist_queue a;
-
-    dist_queue::entry e1 = dist_queue::entry(shared_ptr<t_polygon>(&poly));
-    dist_queue::entry e2 = dist_queue::entry(shared_ptr<t_polygon>(&poly2));
-    a.add(&e1);
-    a.add(&e2);
-
-    for (int x = 0; x < 11; x++)
-    {
-        printf("%d >\n",x);
-        t_point p(x, 0);
-        a.min(p);
-    }
-    // a.add(2);
-}
 
 #endif
