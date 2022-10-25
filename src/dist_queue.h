@@ -1,5 +1,5 @@
-#ifndef DIST_QUEUE_H
-#define DIST_QUEUE_H
+#ifndef __DIST_QUEUE_H__
+#define __DIST_QUEUE_H__
 
 #include <functional>
 #include <queue>
@@ -26,16 +26,21 @@ typedef boost::geometry::model::polygon<t_point> t_polygon;
 
 class dist_queue
 {
+public:
+
     class entry
     {
         shared_ptr<t_polygon> g;
+        t_point last_point;
+        double last_dist;
 
     public:
-        entry(shared_ptr<t_polygon> _g) : g(_g)
+        entry(shared_ptr<t_polygon> _g) : g(_g),last_dist(-1),last_point(-1,-1)
         {
         }
         entry(const entry &e) : g(e.g)
         {
+            printf(" entry(const entry&e)\n");
         }
         // entry& operator=(const entry&o) {
         //     g=o.g;
@@ -53,13 +58,17 @@ class dist_queue
         }
     };
 
-public:
     std::priority_queue<entry, std::vector<entry>, entry_cmp> queue;
     dist_queue(){};
 
-    void add(shared_ptr<t_polygon> g)
+    void add(const entry &e)
     {
-        queue.push(entry(g));
+        queue.push(e);
+    }
+    void min(const t_point&p){
+        
+        queue.top();
+        queue.delete
     }
 };
 
@@ -67,13 +76,20 @@ void a()
 {
 
     t_polygon poly;
-    boost::geometry::read_wkt(
-        "POLYGON((2 1.3,2.4 1.7,2.8 1.8,3.4 1.2,3.7 1.6,3.4 2,4.1 3,5.3 2.6,5.4 1.2,4.9 0.8,2.9 0.7,2 1.3)"
-        "(4.0 2.0, 4.2 1.4, 4.8 1.9, 4.4 2.2, 4.0 2.0))",
-        poly);
+    t_polygon poly2;
+    boost::geometry::read_wkt("POLYGON((0 0,1 1,1 0))", poly);
+    boost::geometry::read_wkt("POLYGON((10 0,11 1,11 0))", poly2);
 
     dist_queue a;
-    a.add(shared_ptr<t_polygon>(&poly));
+
+    a.add(dist_queue::entry(shared_ptr<t_polygon>(&poly)));
+    a.add(dist_queue::entry(shared_ptr<t_polygon>(&poly2)));
+
+
+    for(int x=0;x<11;x++) {
+        t_point p(x,0);
+        a.min(p);
+    }
     // a.add(2);
 }
 
