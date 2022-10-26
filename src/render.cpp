@@ -384,9 +384,11 @@ public:
 	}
 	void show_hulls()
 	{
-		for (auto it = images.begin(); it != images.end(); it++)
-		{
-			it->show_hull();
+		gimp_progress_set_text("show hulls...");
+		gimp_progress_update(0);
+		for(int i=0;i<images.size();i++) {
+			images[i].show_hull();
+			gimp_progress_update((i+1) * 1.0 / images.size());
 		}
 	}
 	void cleanup()
@@ -429,7 +431,6 @@ void render(gint32 image_ID, MontageMode mode)
 		}
 		gchar *name = gimp_drawable_get_name(layers[i]);
 		gint32 mask = gimp_layer_get_mask(layers[i]);
-		printf("mask: %d", mask);
 		if (mask < 0)
 		{
 			// ignore; no mask!
@@ -441,8 +442,6 @@ void render(gint32 image_ID, MontageMode mode)
 
 		PImage mi(mask);
 		mi.debug();
-		// mi.show_distance();
-		// mi.flush();
 		montage.add(mi);
 	}
 
@@ -469,19 +468,8 @@ void render(gint32 image_ID, MontageMode mode)
 	printf("init time: %d\n",(boost::chrono::duration_cast<boost::chrono::milliseconds>(t1-t0)));
 	printf("execution time: %d\n",(boost::chrono::duration_cast<boost::chrono::milliseconds>(t2-t1)));
 
-	// get shape:
-	// * get_mask
-	// * gimp_image_select_color
-	//
-
-	// per-pixel distance ?
-
-	// gimp_layer_add_alpha
-
-	// gimp_drawable_fill(drawable->drawable_id,GIMP_WHITE_FILL);
-
 	free(layers);
 
-	g_message("White-white?@!123");
+	g_message("montager finished %dms",boost::chrono::duration_cast<boost::chrono::milliseconds>(t2-t0));
 	gimp_progress_end();
 }
