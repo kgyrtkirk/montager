@@ -34,7 +34,7 @@ public:
         t_point last_point;
         double last_dist;
         double heur_dist;
-        int index = 0;
+        double index = 0.0;
         int image_idx;
 
         entry(t_polygon _g, int _image_idx) : g(_g),image_idx(_image_idx)
@@ -49,7 +49,7 @@ public:
         //     g=o.g;
         //     return *this;
         // }
-        void update(const t_point&p,int _index) {
+        void update(const t_point&p,double _index) {
             last_point=p;
             last_dist=boost::geometry::distance(last_point, g);
             // printf("up: %d %d => %f\n",p.x(),p.y(),last_dist);
@@ -80,9 +80,13 @@ public:
         queue.push(e);
     }
 
-    int idx=0;
+    double idx=0;
+    t_point last_point;
     entry* min(t_point p)
     {
+        idx+=distance(p,last_point);//dist(p,last_point);
+        last_point=p;
+
         entry*curr=queue.top();
         while( (p.x()!=curr->last_point.x()) || (p.y()!=curr->last_point.y())) {
             queue.pop(); // !#@$ why can't this return the top element?
@@ -92,8 +96,17 @@ public:
 
             curr=queue.top();
         }
-        idx++;
         return curr;
+    }
+
+    double min_radius(t_point p)
+    {
+        min(p); // unneccessary; but correctness
+        entry*top=queue.top();
+        queue.pop();
+        entry*sec=min(p);
+        queue.push(top);
+        return sec->last_dist - top->last_dist;
     }
 };
 
