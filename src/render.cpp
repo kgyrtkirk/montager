@@ -26,7 +26,8 @@ using namespace boost::geometry::strategy::transform;
 using std::shared_ptr;
 
 // single channel image
-class image {
+class image
+{
 	gint32 width;
 	gint32 height;
 	shared_ptr<guchar> img;
@@ -39,20 +40,23 @@ class image {
 			*p = v;
 		}
 	}
+
 public:
-	void init(gint32 w,gint32 h){
-width=w;
-height=h;
-		size_t size = w * h ;
+	void init(gint32 w, gint32 h)
+	{
+		width = w;
+		height = h;
+		size_t size = w * h;
 		shared_ptr<guchar> p0((guchar *)g_malloc(size));
 		img = p0;
 		memset(img.get(), 0, size);
 	}
-	guchar* get() {
+	guchar *get()
+	{
 		img.get();
 	}
 
-	void paint(const point_xy<int> &p,int value)
+	void paint(const point_xy<int> &p, int value)
 	{
 		int x = p.x();
 		int y = p.y();
@@ -81,23 +85,24 @@ height=h;
 		}
 		if (r < 1)
 		{
-			paint(p,value);
+			paint(p, value);
 			return;
 		}
 
 		int c_x = p.x();
 		int c_y = p.y();
-		int r2=r*r;
+		int r2 = r * r;
 
 		for (int y0 = -r; y0 <= r; y0++)
 		{
 			for (int x0 = -r; x0 <= r; x0++)
 			{
-				if(x0*x0+y0*y0 > r2) {
+				if (x0 * x0 + y0 * y0 > r2)
+				{
 					continue;
 				}
-				int x=x0+c_x;
-				int y=y0+c_y;
+				int x = x0 + c_x;
+				int y = y0 + c_y;
 				if (0 <= x && x < width &&
 					0 <= y && y < height)
 				{
@@ -106,11 +111,10 @@ height=h;
 			}
 		}
 	}
-	guchar* row(int r) {
-		return &img.get()[r*width];
+	guchar *row(int r)
+	{
+		return &img.get()[r * width];
 	}
-
-
 };
 
 class PImage
@@ -119,7 +123,7 @@ class PImage
 	polygon<point_xy<int>> local_hull;
 	point_xy<int> pos;
 	polygon<point_xy<int>> hull;
-	image	img;
+	image img;
 
 private:
 	void read_image()
@@ -132,7 +136,7 @@ private:
 		{
 			g_error("bpp is expected to be 1 at this point; however its: %d", bpp);
 		}
-		img.init(w,h);
+		img.init(w, h);
 
 		GimpPixelRgn region;
 		gimp_pixel_rgn_init(&region, drawable, 0, 0, w, h, FALSE, FALSE);
@@ -145,7 +149,7 @@ private:
 		gint h = drawable->height;
 
 		guchar *img = this->img.get();
-			for (int y = 0; y < h; y++)
+		for (int y = 0; y < h; y++)
 		{
 			int g = -1;
 			for (int x = 0; x < w; x++)
@@ -193,7 +197,8 @@ public:
 	{
 		gimp_drawable_detach(drawable);
 	}
-	const polygon<point_xy<int>>&getHull() const {
+	const polygon<point_xy<int>> &getHull() const
+	{
 		return hull;
 	}
 
@@ -201,7 +206,7 @@ public:
 	{
 		int x = p.x() - pos.x();
 		int y = p.y() - pos.y();
-		img.paint(t_point(x,y),254);
+		img.paint(t_point(x, y), 254);
 	}
 
 	double distance(const point_xy<int> &p) const
@@ -321,7 +326,8 @@ public:
 	// in this case the generators are not just points - but polygons
 	void assign_voronoi()
 	{
-		if(num_inputs() < 2) {
+		if (num_inputs() < 2)
+		{
 			g_warning("Not enough input layers for this operation; skipping assign_voronoi!");
 			return;
 		}
@@ -332,22 +338,23 @@ public:
 			g_error("more images than supported");
 		}
 		image aimg;
-		aimg.init(width,height);
+		aimg.init(width, height);
 
-		dist_queue	dq;
+		dist_queue dq;
 
-		for(int i=0;i<images.size();i++) {
-			dq.add(new dist_queue::entry(images[i].getHull(),i));
+		for (int i = 0; i < images.size(); i++)
+		{
+			dq.add(new dist_queue::entry(images[i].getHull(), i));
 		}
 
 		for (int y = 0; y < height; y++)
 		{
 			gimp_progress_update(((double)y) / height);
-			guchar*	row=aimg.row(y);
+			guchar *row = aimg.row(y);
 
 			for (int x0 = 0; x0 < width; x0++)
 			{
-				int x=(y&1) ? width-1-x0 : x0;
+				int x = (y & 1) ? width - 1 - x0 : x0;
 
 				if (row[x] > 0)
 					continue;
@@ -355,25 +362,25 @@ public:
 				// snake-alike space filling curve; do provide |p-p'|=1 invariant
 				point_xy<int> p(x, y);
 
-				auto m=dq.min(p);
-				int minPos=m->image_idx;
+				auto m = dq.min(p);
+				int minPos = m->image_idx;
 				double r = dq.min_radius(p);
 
 				// printf("fill-circ: %d,%d	%f	%d", x, y, r, minPos);
-				aimg.fill_circle(p, r/2, minPos + 1);
-			}
-		}
-		
-		for (int y = 0; y < height; y++)
-		{
-			// gimp_progress_update(((double)y) / height);
-			guchar*	row=aimg.row(y);
-			for (int x = 0; x < width; x++) {
-				point_xy<int> p(x, y);
-				images[row[x]-1].paint(p);
+				aimg.fill_circle(p, r, minPos + 1);
 			}
 		}
 
+		for (int y = 0; y < height; y++)
+		{
+			// gimp_progress_update(((double)y) / height);
+			guchar *row = aimg.row(y);
+			for (int x = 0; x < width; x++)
+			{
+				point_xy<int> p(x, y);
+				images[row[x] - 1].paint(p);
+			}
+		}
 	}
 	void show_hulls()
 	{
@@ -437,7 +444,6 @@ void render(gint32 image_ID, MontageMode mode)
 		// mi.flush();
 		montage.add(mi);
 	}
-
 
 	switch (mode)
 	{
