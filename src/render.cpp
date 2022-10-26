@@ -33,7 +33,7 @@ class image {
 
 	void safe_paint(int x, int y, int v)
 	{
-		guchar *p = &img.get()[y * drawable->width + x];
+		guchar *p = &img.get()[y * width + x];
 		if (*p < 255)
 		{
 			*p = v;
@@ -51,14 +51,14 @@ height=h;
 		img.get();
 	}
 
-	void paint(const point_xy<int> &p)
+	void paint(const point_xy<int> &p,int value)
 	{
-		int x = p.x() - pos.x();
-		int y = p.y() - pos.y();
+		int x = p.x();
+		int y = p.y();
 		if (0 <= x && x < width &&
 			0 <= y && y < height)
 		{
-			safe_paint(x, y, 254);
+			safe_paint(x, y, value);
 		}
 		else
 		{
@@ -66,7 +66,7 @@ height=h;
 			g_warning_once("Belonging point not available on canvas!");
 		}
 	}
-	void paint(const point_xy<int> &p, double radius)
+	void fill_circle(const point_xy<int> &p, double radius, int value)
 	{
 		int r = radius;
 		if (r > 60000)
@@ -80,12 +80,12 @@ height=h;
 		}
 		if (r < 1)
 		{
-			paint(p);
+			paint(p,value);
 			return;
 		}
 
-		int c_x = p.x() - pos.x();
-		int c_y = p.y() - pos.y();
+		int c_x = p.x();
+		int c_y = p.y();
 		int r2=r*r;
 
 		for (int y = -r; y <= r; y++)
@@ -98,7 +98,7 @@ height=h;
 				if (0 <= x && x < width &&
 					0 <= y && y < height)
 				{
-					safe_paint(x, y, 254);
+					safe_paint(x, y, value);
 				}
 			}
 		}
@@ -191,12 +191,7 @@ public:
 	{
 		int x = p.x() - pos.x();
 		int y = p.y() - pos.y();
-		img.paint(t_point(x,y));
-	}
-	void paint(const point_xy<int> &p, double radius){
-		int x = p.x() - pos.x();
-		int y = p.y() - pos.y();
-		img.paint(t_point(x,y),radius);
+		img.paint(t_point(x,y),254);
 	}
 
 	double distance(const point_xy<int> &p) const
@@ -322,11 +317,12 @@ public:
 		}
 
 		gimp_progress_set_text("assign_voronoi");
-		if (images.size() >= 254)
+		if (images.size() >= 253)
 		{
 			g_error("more images than supported");
 		}
-		guchar *aimg = (guchar *)malloc(width * height);
+		image aimg;
+		aimg.init(width,height);
 
 		dist_queue	dq;
 
@@ -348,9 +344,11 @@ public:
 					int minPos=m->image_idx;
 					// double r = dq.min_radius(p);
 
+					// aimg.fill_circle(p, r, minPos);
 					images[minPos].paint(p);
-					
-				}else{
+				}
+				else
+				{
 					double minDist = std::numeric_limits<double>::max();
 					int minPos = -1;
 					for (int i = 0; i < images.size(); i++)
