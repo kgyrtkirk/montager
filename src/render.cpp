@@ -30,6 +30,15 @@ class image {
 	gint32 width;
 	gint32 height;
 	shared_ptr<guchar> img;
+
+	void safe_paint(int x, int y, int v)
+	{
+		guchar *p = &img.get()[y * drawable->width + x];
+		if (*p < 255)
+		{
+			*p = v;
+		}
+	}
 public:
 	void init(gint32 w,gint32 h){
 width=w;
@@ -41,7 +50,60 @@ height=h;
 	guchar* get() {
 		img.get();
 	}
-	
+
+	void paint(const point_xy<int> &p)
+	{
+		int x = p.x() - pos.x();
+		int y = p.y() - pos.y();
+		if (0 <= x && x < width &&
+			0 <= y && y < height)
+		{
+			safe_paint(x, y, 254);
+		}
+		else
+		{
+			// gimp_drawable_get_name(layers[i]);
+			g_warning_once("Belonging point not available on canvas!");
+		}
+	}
+	void paint(const point_xy<int> &p, double radius)
+	{
+		int r = radius;
+		if (r > 60000)
+		{
+			g_error("radius is pretty big - is everything alright?");
+			r = 60000;
+		}
+		if (r > width)
+		{
+			r = width;
+		}
+		if (r < 1)
+		{
+			paint(p);
+			return;
+		}
+
+		int c_x = p.x() - pos.x();
+		int c_y = p.y() - pos.y();
+		int r2=r*r;
+
+		for (int y = -r; y <= r; y++)
+		{
+			for (int x = -r; x <= r; x++)
+			{
+				if(x*x+y*y > r2) {
+					continue;
+				}
+				if (0 <= x && x < width &&
+					0 <= y && y < height)
+				{
+					safe_paint(x, y, 254);
+				}
+			}
+		}
+	}
+
 
 };
 
@@ -101,14 +163,6 @@ private:
 		gimp_drawable_offsets(drawable->drawable_id, &x, &y);
 		pos = point_xy<int>(x, y);
 	}
-	void safe_paint(int x, int y, int v)
-	{
-		guchar *p = &img.get()[y * drawable->width + x];
-		if (*p < 255)
-		{
-			*p = v;
-		}
-	}
 
 public:
 	PImage(gint32 drawable_id)
@@ -133,62 +187,21 @@ public:
 		return hull;
 	}
 
-
-	double distance(const point_xy<int> &p) const
-	{
-		return boost::geometry::distance(p, hull);
-	}
 	void paint(const point_xy<int> &p)
 	{
 		int x = p.x() - pos.x();
 		int y = p.y() - pos.y();
-		if (0 <= x && x < drawable->width &&
-			0 <= y && y < drawable->height)
-		{
-			safe_paint(x, y, 254);
-		}
-		else
-		{
-			// gimp_drawable_get_name(layers[i]);
-			g_warning_once("Belonging point not available on canvas!");
-		}
+		img.paint(t_point(x,y));
 	}
-	void paint(const point_xy<int> &p, double radius)
+	void paint(const point_xy<int> &p, double radius){
+		int x = p.x() - pos.x();
+		int y = p.y() - pos.y();
+		img.paint(t_point(x,y),radius);
+	}
+
+	double distance(const point_xy<int> &p) const
 	{
-		int r = radius;
-		if (r > 60000)
-		{
-			g_error("radius is pretty big - is everything alright?");
-			r = 60000;
-		}
-		if (r > drawable->width)
-		{
-			r = drawable->width;
-		}
-		if (r < 1)
-		{
-			paint(p);
-			return;
-		}
-
-		int c_x = p.x() - pos.x();
-		int c_y = p.y() - pos.y();
-		int r2=r*r;
-
-		for (int y = -r; y <= r; y++)
-		{
-			for (int x = -r; x <= r; x++)
-			{
-				if(x*x+y*y > r2) {
-					continue;
-				}
-				if (0 <= x && x < drawable->width &&
-					0 <= y && y < drawable->height)
-				{
-					safe_paint(x, y, 254);
-				}
-			}
-		}
+		return boost::geometry::distance(p, hull);
 	}
 	void show_distance()
 	{
