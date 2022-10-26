@@ -46,6 +46,7 @@ height=h;
 		size_t size = w * h ;
 		shared_ptr<guchar> p0((guchar *)g_malloc(size));
 		img = p0;
+		memset(img.get(), 0, size);
 	}
 	guchar* get() {
 		img.get();
@@ -88,13 +89,15 @@ height=h;
 		int c_y = p.y();
 		int r2=r*r;
 
-		for (int y = -r; y <= r; y++)
+		for (int y0 = -r; y0 <= r; y0++)
 		{
-			for (int x = -r; x <= r; x++)
+			for (int x0 = -r; x0 <= r; x0++)
 			{
-				if(x*x+y*y > r2) {
+				if(x0*x0+y0*y0 > r2) {
 					continue;
 				}
+				int x=x0+c_x;
+				int y=y0+c_y;
 				if (0 <= x && x < width &&
 					0 <= y && y < height)
 				{
@@ -102,6 +105,9 @@ height=h;
 				}
 			}
 		}
+	}
+	guchar* row(int r) {
+		return &img.get()[r*width];
 	}
 
 
@@ -139,15 +145,19 @@ private:
 		gint h = drawable->height;
 
 		guchar *img = this->img.get();
-		for (int x = 0; x < w; x++)
-		{
 			for (int y = 0; y < h; y++)
+		{
+			int g = -1;
+			for (int x = 0; x < w; x++)
 			{
 				if (img[y * w + x] >= 255)
 				{
-					append(points, make<point_xy<int>>(x, y));
+					if (g == -1)
+						append(points, make<point_xy<int>>(x, y));
+					g = x;
 				}
 			}
+			append(points, make<point_xy<int>>(g, y));
 		}
 
 		convex_hull(points, local_hull);
@@ -333,37 +343,37 @@ public:
 		for (int y = 0; y < height; y++)
 		{
 			gimp_progress_update(((double)y) / height);
+			guchar*	row=aimg.row(y);
+
 			for (int x0 = 0; x0 < width; x0++)
 			{
 				int x=(y&1) ? width-1-x0 : x0;
+
+				if (row[x] > 0)
+					continue;
+
 				// snake-alike space filling curve; do provide |p-p'|=1 invariant
 				point_xy<int> p(x, y);
 
-				if(true) {
-					auto m=dq.min(p);
-					int minPos=m->image_idx;
-					// double r = dq.min_radius(p);
+				auto m=dq.min(p);
+				int minPos=m->image_idx;
+				double r = dq.min_radius(p);
 
-					// aimg.fill_circle(p, r, minPos);
-					images[minPos].paint(p);
-				}
-				else
-				{
-					double minDist = std::numeric_limits<double>::max();
-					int minPos = -1;
-					for (int i = 0; i < images.size(); i++)
-					{
-						double d = images[i].distance(p);
-						if (d < minDist)
-						{
-							minPos = i;
-							minDist = d;
-						}
-					}
-					images[minPos].paint(p);
-				}
+				// printf("fill-circ: %d,%d	%f	%d", x, y, r, minPos);
+				aimg.fill_circle(p, r/2, minPos + 1);
 			}
 		}
+		
+		for (int y = 0; y < height; y++)
+		{
+			// gimp_progress_update(((double)y) / height);
+			guchar*	row=aimg.row(y);
+			for (int x = 0; x < width; x++) {
+				point_xy<int> p(x, y);
+				images[row[x]-1].paint(p);
+			}
+		}
+
 	}
 	void show_hulls()
 	{
