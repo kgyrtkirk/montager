@@ -25,13 +25,33 @@ using boost::geometry::model::d2::point_xy;
 using namespace boost::geometry::strategy::transform;
 using std::shared_ptr;
 
+// single channel image
+class image {
+	gint32 width;
+	gint32 height;
+	shared_ptr<guchar> img;
+public:
+	void init(gint32 w,gint32 h){
+width=w;
+height=h;
+		size_t size = w * h ;
+		shared_ptr<guchar> p0((guchar *)g_malloc(size));
+		img = p0;
+	}
+	guchar* get() {
+		img.get();
+	}
+	
+
+};
+
 class PImage
 {
 	GimpDrawable *drawable;
-	shared_ptr<guchar> img;
 	polygon<point_xy<int>> local_hull;
 	point_xy<int> pos;
 	polygon<point_xy<int>> hull;
+	image	img;
 
 private:
 	void read_image()
@@ -44,8 +64,7 @@ private:
 		{
 			g_error("bpp is expected to be 1 at this point; however its: %d", bpp);
 		}
-		shared_ptr<guchar> p0((guchar *)g_malloc(size));
-		img = p0;
+		img.init(w,h);
 
 		GimpPixelRgn region;
 		gimp_pixel_rgn_init(&region, drawable, 0, 0, w, h, FALSE, FALSE);
@@ -119,7 +138,7 @@ public:
 	{
 		return boost::geometry::distance(p, hull);
 	}
-	double paint(const point_xy<int> &p)
+	void paint(const point_xy<int> &p)
 	{
 		int x = p.x() - pos.x();
 		int y = p.y() - pos.y();
@@ -132,6 +151,43 @@ public:
 		{
 			// gimp_drawable_get_name(layers[i]);
 			g_warning_once("Belonging point not available on canvas!");
+		}
+	}
+	void paint(const point_xy<int> &p, double radius)
+	{
+		int r = radius;
+		if (r > 60000)
+		{
+			g_error("radius is pretty big - is everything alright?");
+			r = 60000;
+		}
+		if (r > drawable->width)
+		{
+			r = drawable->width;
+		}
+		if (r < 1)
+		{
+			paint(p);
+			return;
+		}
+
+		int c_x = p.x() - pos.x();
+		int c_y = p.y() - pos.y();
+		int r2=r*r;
+
+		for (int y = -r; y <= r; y++)
+		{
+			for (int x = -r; x <= r; x++)
+			{
+				if(x*x+y*y > r2) {
+					continue;
+				}
+				if (0 <= x && x < drawable->width &&
+					0 <= y && y < drawable->height)
+				{
+					safe_paint(x, y, 254);
+				}
+			}
 		}
 	}
 	void show_distance()
@@ -239,10 +295,19 @@ public:
 	{
 		images.push_back(image);
 	}
+	int num_inputs()
+	{
+		return images.size();
+	}
 	// this is a bit different than Voronoi diagram; but the concept is close-enough
 	// in this case the generators are not just points - but polygons
 	void assign_voronoi()
 	{
+		if(num_inputs() < 2) {
+			g_warning("Not enough input layers for this operation; skipping assign_voronoi!");
+			return;
+		}
+
 		gimp_progress_set_text("assign_voronoi");
 		if (images.size() >= 254)
 		{
@@ -268,7 +333,10 @@ public:
 				if(true) {
 					auto m=dq.min(p);
 					int minPos=m->image_idx;
+					// double r = dq.min_radius(p);
+
 					images[minPos].paint(p);
+					
 				}else{
 					double minDist = std::numeric_limits<double>::max();
 					int minPos = -1;
@@ -348,6 +416,7 @@ void render(gint32 image_ID, MontageMode mode)
 		// mi.flush();
 		montage.add(mi);
 	}
+
 
 	switch (mode)
 	{
