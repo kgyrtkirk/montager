@@ -12,7 +12,6 @@
 #include <boost/geometry/geometries/point_xy.hpp>
 // #include <boost/geometry/multi/geometries/multi_point.hpp>
 
-BOOST_GEOMETRY_REGISTER_BOOST_TUPLE_CS(cs::cartesian)
 
 using namespace boost::geometry;
 using boost::geometry::model::multi_point;
@@ -36,8 +35,9 @@ public:
         double last_dist;
         double heur_dist;
         int index = 0;
+        int image_idx;
 
-        entry(t_polygon _g) : g(_g)
+        entry(t_polygon _g, int _image_idx) : g(_g),image_idx(_image_idx)
         {
             update(t_point(0,0),0);
         }
@@ -81,7 +81,7 @@ public:
     }
 
     int idx=0;
-    void min(t_point p)
+    entry* min(t_point p)
     {
         entry*curr=queue.top();
         while( (p.x()!=curr->last_point.x()) || (p.y()!=curr->last_point.y())) {
@@ -93,6 +93,7 @@ public:
             curr=queue.top();
         }
         idx++;
+        return curr;
     }
 };
 

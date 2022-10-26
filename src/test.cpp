@@ -5,6 +5,8 @@
 #include <glib.h>
 #include "dist_queue.h"
 
+BOOST_GEOMETRY_REGISTER_BOOST_TUPLE_CS(cs::cartesian)
+
 typedef struct {
 //   OtherObject *helper;
 } MyObjectFixture;
@@ -32,8 +34,8 @@ test_my_object_test1 (MyObjectFixture *fixture,
 
     dist_queue a;
 
-    dist_queue::entry e1 = dist_queue::entry(poly);
-    dist_queue::entry e2 = dist_queue::entry(poly2);
+    dist_queue::entry e1 = dist_queue::entry(poly,1);
+    dist_queue::entry e2 = dist_queue::entry(poly2,2);
     a.add(&e1);
     a.add(&e2);
 

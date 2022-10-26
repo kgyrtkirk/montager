@@ -9,3 +9,6 @@ This is my first Rust project as well - and as such it may contain misuses of th
 
 testrun1:	8000x5000	~30 image
 18:05 ~ 22:00 ~ 25%
+
+testrun2; +dist_queue
+14:59 ~ 15:27	

@@ -6,6 +6,7 @@
 
 #include "main.h"
 #include "render.h"
+#include "dist_queue.h"
 
 #include <iostream>
 
@@ -29,8 +30,8 @@ class PImage
 	GimpDrawable *drawable;
 	shared_ptr<guchar> img;
 	polygon<point_xy<int>> local_hull;
-	polygon<point_xy<int>> hull;
 	point_xy<int> pos;
+	polygon<point_xy<int>> hull;
 
 private:
 	void read_image()
@@ -109,6 +110,10 @@ public:
 	{
 		gimp_drawable_detach(drawable);
 	}
+	const polygon<point_xy<int>>&getHull() const {
+		return hull;
+	}
+
 
 	double distance(const point_xy<int> &p) const
 	{
@@ -245,6 +250,12 @@ public:
 		}
 		guchar *aimg = (guchar *)malloc(width * height);
 
+		dist_queue	dq;
+
+		for(int i=0;i<images.size();i++) {
+			dq.add(new dist_queue::entry(images[i].getHull(),i));
+		}
+
 		for (int y = 0; y < height; y++)
 		{
 			gimp_progress_update(((double)y) / height);
@@ -254,22 +265,24 @@ public:
 				// snake-alike space filling curve; do provide |p-p'|=1 invariant
 				point_xy<int> p(x, y);
 
-
-
-				
-				
-				double minDist = std::numeric_limits<double>::max();
-				int minPos = -1;
-				for (int i = 0; i < images.size(); i++)
-				{
-					double d = images[i].distance(p);
-					if (d < minDist)
+				if(true) {
+					auto m=dq.min(p);
+					int minPos=m->image_idx;
+					images[minPos].paint(p);
+				}else{
+					double minDist = std::numeric_limits<double>::max();
+					int minPos = -1;
+					for (int i = 0; i < images.size(); i++)
 					{
-						minPos = i;
-						minDist = d;
+						double d = images[i].distance(p);
+						if (d < minDist)
+						{
+							minPos = i;
+							minDist = d;
+						}
 					}
+					images[minPos].paint(p);
 				}
-				images[minPos].paint(p);
 			}
 		}
 	}
