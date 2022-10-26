@@ -29,7 +29,7 @@ set(montager_test_SRC ${core_SRC} "src/test.cpp")
 #file(GLOB montager_SRC
 #)
 
-FIND_PACKAGE( Boost 1.40 COMPONENTS program_options log log_setup iostreams REQUIRED )
+FIND_PACKAGE( Boost 1.40 COMPONENTS program_options log log_setup iostreams chrono REQUIRED )
 INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIR} )
 
 find_package(PkgConfig REQUIRED)

@@ -33,7 +33,16 @@ This project was created to make the process easier and possibly create better m
   * after 4 hours I've seen that the progress bar was at around 25%; so I killed it....this is way too slow!
 * I was doing `width*height*nImage` distance measurements...
 * I came up with an idea of employing some simple algo to reduce the number of distance measurements to find the region the point belongs to
+  * idea was to
+* this got me to pretty reasonable execution times with the small test image; and to ~30 minutes with the "real life" image
+* I wanted to have this execution time below at least making a cup of coffee...so 3-5 minutes at tops...
+* My next idea was to exploit the locality properties of the problem:
+  * if some point belong to group A - then most likely the neighbouring ones also belong there
+  * this have lead me to compute the `min_radius` - and assign that entire circle to some region
+* this have got me down to almost-instant voronoi gen on the small and ~59s on the bigger one
+* compared to the other stuff; convex hull started to took significant time - not adding internal points in every row made it almost invisible
 * 
+
 testrun1:	8000x5000	~30 image
 18:05 ~ 22:00 ~ 25%
 

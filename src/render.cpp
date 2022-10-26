@@ -10,6 +10,7 @@
 
 #include <iostream>
 
+#include <boost/chrono.hpp>
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/polygon.hpp>
 #include <boost/geometry/geometries/adapted/boost_tuple.hpp>
@@ -366,8 +367,6 @@ public:
 				auto m = dq.min(p);
 				int minPos = m->image_idx;
 				double r = dq.min_radius(p);
-
-				// printf("fill-circ: %d,%d	%f	%d", x, y, r, minPos);
 				aimg.fill_circle(p, r / 2, minPos + 1);
 			}
 		}
@@ -416,6 +415,7 @@ void render(gint32 image_ID, MontageMode mode)
 	gint *layers = gimp_image_get_layers(image_ID, &num_layers);
 
 	PMontage montage(image_ID);
+	boost::chrono::high_resolution_clock::time_point t0  = boost::chrono::high_resolution_clock::now();
 	for (int i = 0; i < num_layers; i++)
 	{
 		gint32 layer = layers[i];
@@ -446,6 +446,7 @@ void render(gint32 image_ID, MontageMode mode)
 		montage.add(mi);
 	}
 
+	boost::chrono::high_resolution_clock::time_point t1  = boost::chrono::high_resolution_clock::now();
 	switch (mode)
 	{
 	case MontageMode::CLEANUP_MASKS:
@@ -464,6 +465,9 @@ void render(gint32 image_ID, MontageMode mode)
 		g_error("unhandled switch branch");
 		break;
 	}
+	boost::chrono::high_resolution_clock::time_point t2  = boost::chrono::high_resolution_clock::now();
+	printf("init time: %d\n",(boost::chrono::duration_cast<boost::chrono::milliseconds>(t1-t0)));
+	printf("execution time: %d\n",(boost::chrono::duration_cast<boost::chrono::milliseconds>(t2-t1)));
 
 	// get shape:
 	// * get_mask
