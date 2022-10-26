@@ -41,7 +41,8 @@ This project was created to make the process easier and possibly create better m
   * this have lead me to compute the `min_radius` - and assign that entire circle to some region
 * this have got me down to almost-instant voronoi gen on the small and ~59s on the bigger one
 * compared to the other stuff; convex hull started to took significant time - not adding internal points in every row made it almost invisible
-* 
+* the are filling approach could be the most effective when there is no neighbour pixels assigned to anywhere...
+  * found a typo; which resulted in filling to small places; 35s
 
 testrun1:	8000x5000	~30 image
 18:05 ~ 22:00 ~ 25%
