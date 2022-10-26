@@ -12,6 +12,7 @@
 #include <boost/geometry/geometries/point_xy.hpp>
 // #include <boost/geometry/multi/geometries/multi_point.hpp>
 
+
 using namespace boost::geometry;
 using boost::geometry::model::multi_point;
 using boost::geometry::model::polygon;
@@ -36,9 +37,9 @@ public:
         double index = 0.0;
         int image_idx;
 
-        entry(t_polygon _g, int _image_idx) : g(_g), image_idx(_image_idx)
+        entry(t_polygon _g, int _image_idx) : g(_g),image_idx(_image_idx)
         {
-            update(t_point(0, 0), 0);
+            update(t_point(0,0),0);
         }
         // entry(const entry &e) : g(e.g)
         // {
@@ -48,13 +49,12 @@ public:
         //     g=o.g;
         //     return *this;
         // }
-        void update(const t_point &p, double _index)
-        {
-            last_point = p;
-            last_dist = boost::geometry::distance(last_point, g);
+        void update(const t_point&p,double _index) {
+            last_point=p;
+            last_dist=boost::geometry::distance(last_point, g);
             // printf("up: %d %d => %f\n",p.x(),p.y(),last_dist);
-            index = _index;
-            heur_dist = last_dist + index;
+            index=_index;
+            heur_dist=last_dist+index;
         }
     };
 
@@ -80,34 +80,33 @@ public:
         queue.push(e);
     }
 
-    double idx = 0;
+    double idx=0;
     t_point last_point;
-    entry *min(t_point p)
+    entry* min(t_point p)
     {
-        idx += distance(p, last_point); // dist(p,last_point);
-        last_point = p;
+        idx+=distance(p,last_point);//dist(p,last_point);
+        last_point=p;
 
-        entry *curr = queue.top();
-        while ((p.x() != curr->last_point.x()) || (p.y() != curr->last_point.y()))
-        {
+        entry*curr=queue.top();
+        while( (p.x()!=curr->last_point.x()) || (p.y()!=curr->last_point.y())) {
             queue.pop(); // !#@$ why can't this return the top element?
 
-            curr->update(p, idx);
+            curr->update( p,idx);
             queue.push(curr);
 
-            curr = queue.top();
+            curr=queue.top();
         }
         return curr;
     }
-    // returns the min radius in which the minima will not change
+    // returns the min radius in which the minima will not change 
     double min_radius(t_point p)
     {
         min(p); // unneccessary; but correctness
-        entry *top = queue.top();
+        entry*top=queue.top();
         queue.pop();
-        entry *sec = min(p);
+        entry*sec=min(p);
         queue.push(top);
-        return (sec->last_dist - top->last_dist) / 2;
+        return (sec->last_dist - top->last_dist)/2;
     }
 };
 
