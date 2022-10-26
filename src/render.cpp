@@ -145,15 +145,20 @@ private:
 		gint h = drawable->height;
 
 		guchar *img = this->img.get();
-		for (int x = 0; x < w; x++)
-		{
 			for (int y = 0; y < h; y++)
+		{
+			int g = -1;
+			for (int x = 0; x < w; x++)
 			{
 				if (img[y * w + x] >= 255)
 				{
-					append(points, make<point_xy<int>>(x, y));
+					if (g == -1)
+						append(points, make<point_xy<int>>(x, y));
+					g = x;
 				}
 			}
+			if(g>=0)
+			append(points, make<point_xy<int>>(g, y));
 		}
 
 		convex_hull(points, local_hull);
@@ -355,7 +360,7 @@ public:
 				int minPos=m->image_idx;
 				double r = dq.min_radius(p);
 
-				printf("fill-circ: %d,%d	%f	%d", x, y, r, minPos);
+				// printf("fill-circ: %d,%d	%f	%d", x, y, r, minPos);
 				aimg.fill_circle(p, r/2, minPos + 1);
 			}
 		}
