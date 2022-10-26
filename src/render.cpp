@@ -362,10 +362,10 @@ public:
 				auto m = dq.min(p);
 				int minPos = m->image_idx;
 				double r = dq.min_radius(p);
-				aimg.fill_circle(p, r / 2, minPos + 1);
+				aimg.fill_circle(p, r, minPos + 1);
 			}
 		}
-		
+
 		if(true)
 		for (int y = d/2; y < height; y+=d)
 		{
@@ -379,13 +379,12 @@ public:
 				if (row[x] > 0)
 					continue;
 
-				// snake-alike space filling curve; do provide |p-p'|=1 invariant
 				point_xy<int> p(x, y);
 
 				auto m = dq.min(p);
 				int minPos = m->image_idx;
 				double r = dq.min_radius(p);
-				aimg.fill_circle(p, r / 2, minPos + 1);
+				aimg.fill_circle(p, r, minPos + 1);
 			}
 		}
 
@@ -407,7 +406,7 @@ public:
 				auto m = dq.min(p);
 				int minPos = m->image_idx;
 				double r = dq.min_radius(p);
-				aimg.fill_circle(p, r / 2, minPos + 1);
+				aimg.fill_circle(p, r, minPos + 1);
 			}
 		}
 
