@@ -42,7 +42,9 @@ This project was created to make the process easier and possibly create better m
 * this have got me down to almost-instant voronoi gen on the small and ~59s on the bigger one
 * compared to the other stuff; convex hull started to took significant time - not adding internal points in every row made it almost invisible
 * the are filling approach could be the most effective when there is no neighbour pixels assigned to anywhere...
-  * found a typo; which resulted in filling to small places; 35s
+  * found a typo; which resulted in filling to small places; this got me around 36s
+  * tried to process the hull centroids first - in the hope that they will cover a large blob - but the gain was negligable; so I've throw it out
+  * tried some hilber curves - but that wasn't beneficial either; so I've removed that one as well
 
 testrun1:	8000x5000	~30 image
 18:05 ~ 22:00 ~ 25%

@@ -302,6 +302,51 @@ public:
 	}
 };
 
+
+//	https://en.wikipedia.org/wiki/Hilbert_curve
+//rotate/flip a quadrant appropriately
+void rot(int n, int *x, int *y, int rx, int ry) {
+    if (ry == 0) {
+        if (rx == 1) {
+            *x = n-1 - *x;
+            *y = n-1 - *y;
+        }
+
+        //Swap x and y
+        int t  = *x;
+        *x = *y;
+        *y = t;
+    }
+}
+//	convert d to (x,y)
+void d2xy(int n, int d, int *x, int *y) {
+    int rx, ry, s, t=d;
+    *x = *y = 0;
+    for (s=1; s<n; s*=2) {
+        rx = 1 & (t/2);
+        ry = 1 & (t ^ rx);
+        rot(s, x, y, rx, ry);
+        *x += s * rx;
+        *y += s * ry;
+        t /= 4;
+    }
+}
+
+
+guint32 next_power_2(guint32 v)
+{
+    v--;
+    v |= v >> 1;
+    v |= v >> 2;
+    v |= v >> 4;
+    v |= v >> 8;
+    v |= v >> 16;
+    v++;
+    return v;
+
+}
+
+
 class PMontage
 {
 	std::vector<PImage> images;
@@ -349,6 +394,32 @@ public:
 			dq.add(new dist_queue::entry(images[i].getHull(), i));
 		}
 
+
+		if(false) {
+		int n=next_power_2(std::max(height,width));
+
+			int n2=n*n;
+			guchar *p = aimg.get();
+
+			for(int d=0;d<n2;d++) {
+				if(d%n==0) {
+					gimp_progress_update(((double)d) / n2);
+				}
+				int x;
+				int y;
+				d2xy(n,d,&x,&y);
+				if(x>=width || y>=height)
+					continue;
+				if(p[x+width*y]>0){
+					continue;
+				}
+				point_xy<int> p(x, y);
+				auto m = dq.min(p);
+				int minPos = m->image_idx;
+				double r = dq.min_radius(p);
+				aimg.fill_circle(p, r, minPos + 1);
+			}
+		}else
 		for (int y = 0; y < height; y++)
 		{
 			gimp_progress_update(((double)y) / height);
