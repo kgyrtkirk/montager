@@ -1,4 +1,5 @@
 #include "pmontage.h"
+#include "dist_queue.h"
 
 // this is a bit different than Voronoi diagram; but the concept is close-enough
 // in this case the generators are not just points - but polygons

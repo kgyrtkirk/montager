@@ -6,17 +6,10 @@
 
 #include "main.h"
 #include "image.h"
-#include "dist_queue.h"
 #include "pimage.h"
 
 #include <iostream>
 
-#include <boost/chrono.hpp>
-#include <boost/geometry.hpp>
-#include <boost/geometry/geometries/polygon.hpp>
-#include <boost/geometry/geometries/adapted/boost_tuple.hpp>
-#include <boost/geometry/geometries/point_xy.hpp>
-#include <boost/geometry/multi/geometries/multi_point.hpp>
 
 class PMontage
 {
@@ -42,7 +35,7 @@ public:
 	// this is a bit different than Voronoi diagram; but the concept is close-enough
 	// in this case the generators are not just points - but polygons
 	void assign_voronoi();
-	
+
 	void show_hulls()
 	{
 		gimp_progress_set_text("show hulls...");

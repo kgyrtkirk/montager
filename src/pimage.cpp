@@ -1,6 +1,5 @@
 #include "pimage.h"
 
-#include <boost/chrono.hpp>
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/polygon.hpp>
 #include <boost/geometry/multi/geometries/multi_point.hpp>

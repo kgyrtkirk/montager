@@ -9,6 +9,8 @@
 #include "interface.h"
 #include "pmontage.h"
 
+#include <boost/chrono.hpp>
+
 /*  Constants  */
 
 #define PROCEDURE_SHOW_HULLS "show_hulls"
