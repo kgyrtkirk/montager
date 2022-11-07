@@ -23,6 +23,15 @@
 
 #define PARASITE_KEY "plug-in-template-options"
 
+enum MontageMode {
+	SHOW_HULLS,
+	VORONOI,
+	CLEANUP_MASKS,
+	SELECT_EDGES,
+	CROSSFADE_EDGES,
+};
+
+
 /*  Local function prototypes  */
 
 static void query(void);

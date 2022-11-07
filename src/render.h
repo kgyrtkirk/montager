@@ -3,13 +3,6 @@
 
 
 /*  Public functions  */
-enum MontageMode {
-	SHOW_HULLS,
-	VORONOI,
-	CLEANUP_MASKS,
-	SELECT_EDGES,
-	CROSSFADE_EDGES,
-};
 
 // void render(gint32 image_ID, MontageMode mode);
 
