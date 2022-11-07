@@ -19,7 +19,6 @@
 #include <boost/geometry/geometries/point_xy.hpp>
 #include <boost/geometry/multi/geometries/multi_point.hpp>
 
-
 class PMontage
 {
 	std::vector<PImage> images;
@@ -30,7 +29,6 @@ class PMontage
 public:
 	PMontage(gint32 _image_id) : image_id(_image_id)
 	{
-
 		width = gimp_image_width(image_id);
 		height = gimp_image_height(image_id);
 	}

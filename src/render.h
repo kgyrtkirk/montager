@@ -11,7 +11,7 @@ enum MontageMode {
 	CROSSFADE_EDGES,
 };
 
-void render(gint32 image_ID, MontageMode mode);
+// void render(gint32 image_ID, MontageMode mode);
 
 // void   render (gint32              image_ID,
 // 	       GimpDrawable       *drawable,
