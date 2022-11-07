@@ -3,7 +3,8 @@
 #include <string.h>
 
 #include <libgimp/gimp.h>
-#include <libgimp/gimpui.h>
+//#include <libgimp/gimpui.h>
+
 
 #include "main.h"
 #include "interface.h"
@@ -246,7 +247,7 @@ void render(gint32 image_ID, MontageMode mode)
 	gimp_progress_end();
 }
 
-
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 static void
 run(const gchar *name,
     gint n_params,

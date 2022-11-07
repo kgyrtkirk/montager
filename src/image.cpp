@@ -40,3 +40,19 @@ void image::fill_circle(const point_xy &p, double radius, int value)
         }
     }
 }
+
+void image::paint(const point_xy &p, int value)
+{
+    int x = p.x();
+    int y = p.y();
+    if (0 <= x && x < width &&
+        0 <= y && y < height)
+    {
+        safe_paint(x, y, value);
+    }
+    else
+    {
+        // gimp_drawable_get_name(layers[i]);
+        g_warning_once("Belonging point not available on canvas!");
+    }
+}

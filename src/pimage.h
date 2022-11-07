@@ -1,7 +1,7 @@
 #pragma once
 #include "config.h"
 
-#include <gtk/gtk.h>
+#include <string.h>
 
 #include <libgimp/gimp.h>
 
@@ -24,27 +24,13 @@ class PImage
 	image img;
 
 private:
-	void read_image()
-	{
-		gint bpp = drawable->bpp;
-		gint w = drawable->width;
-		gint h = drawable->height;
-		size_t size = w * h * bpp;
-		if (bpp != 1)
-		{
-			g_error("bpp is expected to be 1 at this point; however its: %d", bpp);
-		}
-		img.init(w, h);
-
-		GimpPixelRgn region;
-		gimp_pixel_rgn_init(&region, drawable, 0, 0, w, h, FALSE, FALSE);
-		gimp_pixel_rgn_get_rect(&region, img.get(), 0, 0, w, h);
-	}
+	void read_image();
 	void compute_hull();
-	
-	
+
 	void extract_drawable_infos(gint32 drawable_id)
 	{
+		// gimp_drawable_get_buffer
+		
 		drawable = gimp_drawable_get(drawable_id);
 		gint x, y;
 		gimp_drawable_offsets(drawable->drawable_id, &x, &y);
@@ -84,11 +70,11 @@ public:
 
 	double distance(const point_xy &p) const;
 	void show_distance();
-	void debug()
-;	void cleanup()
-;	void show_hull()
-;	void flush()
-;	GimpDrawable *getDrawable()
+	void debug();
+	void cleanup();
+	void show_hull();
+	void flush();
+	GimpDrawable *getDrawable()
 	{
 		return drawable;
 	}

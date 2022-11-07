@@ -1,5 +1,4 @@
-#ifndef __MAIN_H__
-#define __MAIN_H__
+#pragma once
 
 typedef struct
 {
@@ -31,5 +30,3 @@ extern const PlugInVals default_vals;
 extern const PlugInImageVals default_image_vals;
 extern const PlugInDrawableVals default_drawable_vals;
 extern const PlugInUIVals default_ui_vals;
-
-#endif /* __MAIN_H__ */

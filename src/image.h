@@ -1,7 +1,13 @@
 #pragma once
 #include "config.h"
 
+#include <string.h>
+
 #include <gtk/gtk.h>
+#include <libgimp/gimp.h>
+
+#include "config.h"
+
 #include <memory>
 #include <boost/geometry/geometries/point_xy.hpp>
 
@@ -9,7 +15,7 @@
 class image
 {
 	typedef boost::geometry::model::d2::point_xy<int> point_xy;
-	
+
 	gint32 width;
 	gint32 height;
 	std::shared_ptr<guchar> img;
@@ -35,24 +41,10 @@ public:
 	}
 	guchar *get()
 	{
-		img.get();
+		return img.get();
 	}
 
-	void paint(const point_xy &p, int value)
-	{
-		int x = p.x();
-		int y = p.y();
-		if (0 <= x && x < width &&
-			0 <= y && y < height)
-		{
-			safe_paint(x, y, value);
-		}
-		else
-		{
-			// gimp_drawable_get_name(layers[i]);
-			g_warning_once("Belonging point not available on canvas!");
-		}
-	}
+	void paint(const point_xy &p, int value);
 	void fill_circle(const point_xy &p, double radius, int value);
 	guchar *row(int r)
 	{
