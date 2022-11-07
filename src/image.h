@@ -2,18 +2,12 @@
 #include "config.h"
 
 #include <gtk/gtk.h>
-
-#include <libgimp/gimp.h>
-#include <iostream>
 #include <memory>
 #include <boost/geometry/geometries/point_xy.hpp>
 
 // single channel image
 class image
 {
-	// template<class T>
-	// using point_xy<T> = boost::geometry::model::d2::point_xy<T>;
-	// typename boost::geometry::model::d2::point_xy<T> point_xy<T>;
 	typedef boost::geometry::model::d2::point_xy<int> point_xy;
 	
 	gint32 width;
