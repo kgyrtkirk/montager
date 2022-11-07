@@ -419,6 +419,30 @@ public:
 		gimp_selection_load(selection_channel);
 		gimp_item_delete(selection_channel);
 	}
+	void crossfade(gdouble radius)
+	{
+		gimp_selection_none(image_id);
+
+		for (auto it = images.begin(); it != images.end(); it++)
+		{
+
+			gimp_selection_none(image_id);
+			gimp_image_select_item(image_id, GIMP_CHANNEL_OP_REPLACE, it->getDrawable()->drawable_id);
+
+			it->cleanup();
+			it->flush();
+
+			// feather works strangely; where >2 this will not work anyway...will get back later
+
+			gdouble off = radius / 4;
+			gimp_selection_grow(image_id, off);
+			gimp_selection_feather(image_id, radius);
+
+			gimp_drawable_edit_fill(it->getDrawable()->drawable_id, GIMP_WHITE_FILL);
+			gimp_selection_shrink(image_id, off);
+		}
+	}
+
 	void flush()
 	{
 		for (auto it = images.begin(); it != images.end(); it++)
@@ -485,6 +509,11 @@ void render(gint32 image_ID, MontageMode mode)
 		// montage.show_hulls();
 		// montage.flush();
 		montage.select_edges();
+		break;
+	case MontageMode::CROSSFADE_EDGES:
+		// montage.show_hulls();
+		// montage.flush();
+		montage.crossfade(30);
 		break;
 	default:
 		g_error("unhandled switch branch");

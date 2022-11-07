@@ -15,6 +15,7 @@
 #define PROCEDURE_COMPUTE_VORONOI "compute_voronoi"
 #define PROCEDURE_CLEANUP_MASKS "cleanup_masks"
 #define PROCEDURE_SELECT_EDGES "select_edges"
+#define PROCEDURE_CROSSFADE_EDGES "crossfade_edges"
 
 #define DATA_KEY_VALS "plug_in_template"
 #define DATA_KEY_UI_VALS "plug_in_template_ui"
@@ -91,6 +92,7 @@ query(void)
   // gimp_plugin_help_register ("http://developer.gimp.org/plug-in-template/help",
   //                            help_uri);
 
+
   gimp_install_procedure(PROCEDURE_SHOW_HULLS,
                          "Shows the convex hulls of the layers",
                          "Help",
@@ -139,9 +141,22 @@ query(void)
                          G_N_ELEMENTS(args), 0,
                          args, NULL);
 
+  gimp_install_procedure(PROCEDURE_CROSSFADE_EDGES,
+                         "Crossfades the edges between the voronoi fields",
+                         "Help",
+                         "Zoltan Haindrich <kirk@rxd.hu>",
+                         "Zoltan Haindrich <kirk@rxd.hu>",
+                         "2022",
+                         "Crossfade edges",
+                         "RGB*, GRAY*, INDEXED*",
+                         GIMP_PLUGIN,
+                         G_N_ELEMENTS(args), 0,
+                         args, NULL);
+
   gimp_plugin_menu_register(PROCEDURE_SHOW_HULLS, "<Image>/Filters/Montager/");
   gimp_plugin_menu_register(PROCEDURE_COMPUTE_VORONOI, "<Image>/Filters/Montager/");
   gimp_plugin_menu_register(PROCEDURE_SELECT_EDGES, "<Image>/Filters/Montager/");
+  gimp_plugin_menu_register(PROCEDURE_CROSSFADE_EDGES, "<Image>/Filters/Montager/");
   gimp_plugin_menu_register(PROCEDURE_CLEANUP_MASKS, "<Image>/Filters/Montager/");
 }
 
@@ -187,6 +202,10 @@ run(const gchar *name,
   if (strcmp(name, PROCEDURE_SELECT_EDGES) == 0)
   {
     render(image_ID, MontageMode::SELECT_EDGES);
+  }
+  if (strcmp(name, PROCEDURE_CROSSFADE_EDGES) == 0)
+  {
+    render(image_ID, MontageMode::CROSSFADE_EDGES);
   }
   gimp_image_undo_group_end(image_ID);
 

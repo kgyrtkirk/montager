@@ -8,6 +8,7 @@ enum MontageMode {
 	VORONOI,
 	CLEANUP_MASKS,
 	SELECT_EDGES,
+	CROSSFADE_EDGES,
 };
 
 void render(gint32 image_ID, MontageMode mode);
