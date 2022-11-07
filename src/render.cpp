@@ -127,7 +127,6 @@ class PImage
 	image img;
 
 private:
-
 	void read_image()
 	{
 		gint bpp = drawable->bpp;
@@ -391,9 +390,10 @@ public:
 	{
 		gimp_progress_set_text("show hulls...");
 		gimp_progress_update(0);
-		for(int i=0;i<images.size();i++) {
+		for (int i = 0; i < images.size(); i++)
+		{
 			images[i].show_hull();
-			gimp_progress_update((i+1) * 1.0 / images.size());
+			gimp_progress_update((i + 1) * 1.0 / images.size());
 		}
 	}
 	void cleanup()
@@ -403,17 +403,18 @@ public:
 			it->cleanup();
 		}
 	}
-	void select_edges() {
+	void select_edges()
+	{
 		gimp_selection_none(image_id);
 
 		int selection_channel = gimp_selection_save(image_id);
 		for (auto it = images.begin(); it != images.end(); it++)
 		{
 			gimp_image_select_item(image_id, GIMP_CHANNEL_OP_REPLACE, it->getDrawable()->drawable_id);
-			gimp_selection_shrink(image_id,3);
+			gimp_selection_shrink(image_id, 3);
 			gimp_image_select_item(image_id, GIMP_CHANNEL_OP_ADD, selection_channel);
 			gimp_item_delete(selection_channel);
-			selection_channel=gimp_selection_save(image_id);
+			selection_channel = gimp_selection_save(image_id);
 		}
 		gimp_selection_load(selection_channel);
 		gimp_item_delete(selection_channel);
@@ -437,7 +438,7 @@ void render(gint32 image_ID, MontageMode mode)
 	gint *layers = gimp_image_get_layers(image_ID, &num_layers);
 
 	PMontage montage(image_ID);
-	boost::chrono::high_resolution_clock::time_point t0  = boost::chrono::high_resolution_clock::now();
+	boost::chrono::high_resolution_clock::time_point t0 = boost::chrono::high_resolution_clock::now();
 	for (int i = 0; i < num_layers; i++)
 	{
 		gint32 layer = layers[i];
@@ -465,7 +466,7 @@ void render(gint32 image_ID, MontageMode mode)
 		montage.add(mi);
 	}
 
-	boost::chrono::high_resolution_clock::time_point t1  = boost::chrono::high_resolution_clock::now();
+	boost::chrono::high_resolution_clock::time_point t1 = boost::chrono::high_resolution_clock::now();
 	switch (mode)
 	{
 	case MontageMode::CLEANUP_MASKS:
@@ -489,12 +490,12 @@ void render(gint32 image_ID, MontageMode mode)
 		g_error("unhandled switch branch");
 		break;
 	}
-	boost::chrono::high_resolution_clock::time_point t2  = boost::chrono::high_resolution_clock::now();
-	printf("init time: %d\n",(boost::chrono::duration_cast<boost::chrono::milliseconds>(t1-t0)));
-	printf("execution time: %d\n",(boost::chrono::duration_cast<boost::chrono::milliseconds>(t2-t1)));
+	boost::chrono::high_resolution_clock::time_point t2 = boost::chrono::high_resolution_clock::now();
+	printf("init time: %d\n", (boost::chrono::duration_cast<boost::chrono::milliseconds>(t1 - t0)));
+	printf("execution time: %d\n", (boost::chrono::duration_cast<boost::chrono::milliseconds>(t2 - t1)));
 
 	free(layers);
 
-	g_message("montager finished %dms",boost::chrono::duration_cast<boost::chrono::milliseconds>(t2-t0));
+	g_message("montager finished %dms", boost::chrono::duration_cast<boost::chrono::milliseconds>(t2 - t0));
 	gimp_progress_end();
 }
