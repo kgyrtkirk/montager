@@ -127,6 +127,7 @@ class PImage
 	image img;
 
 private:
+
 	void read_image()
 	{
 		gint bpp = drawable->bpp;
@@ -300,6 +301,10 @@ public:
 		gimp_drawable_merge_shadow(drawable->drawable_id, TRUE);
 		gimp_drawable_update(drawable->drawable_id, 0, 0, w, h);
 	}
+	GimpDrawable *getDrawable()
+	{
+		return drawable;
+	}
 };
 
 class PMontage
@@ -398,6 +403,21 @@ public:
 			it->cleanup();
 		}
 	}
+	void select_edges() {
+		gimp_selection_none(image_id);
+
+		int selection_channel = gimp_selection_save(image_id);
+		for (auto it = images.begin(); it != images.end(); it++)
+		{
+			gimp_image_select_item(image_id, GIMP_CHANNEL_OP_REPLACE, it->getDrawable()->drawable_id);
+			gimp_selection_shrink(image_id,3);
+			gimp_image_select_item(image_id, GIMP_CHANNEL_OP_ADD, selection_channel);
+			gimp_item_delete(selection_channel);
+			selection_channel=gimp_selection_save(image_id);
+		}
+		gimp_selection_load(selection_channel);
+		gimp_item_delete(selection_channel);
+	}
 	void flush()
 	{
 		for (auto it = images.begin(); it != images.end(); it++)
@@ -459,6 +479,11 @@ void render(gint32 image_ID, MontageMode mode)
 	case MontageMode::SHOW_HULLS:
 		montage.show_hulls();
 		montage.flush();
+		break;
+	case MontageMode::SELECT_EDGES:
+		// montage.show_hulls();
+		// montage.flush();
+		montage.select_edges();
 		break;
 	default:
 		g_error("unhandled switch branch");
