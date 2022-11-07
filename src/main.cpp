@@ -7,7 +7,6 @@
 
 #include "main.h"
 #include "interface.h"
-#include "render.h"
 #include "pmontage.h"
 
 /*  Constants  */

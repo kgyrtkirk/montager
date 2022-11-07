@@ -6,7 +6,6 @@
 #include <libgimp/gimp.h>
 
 #include "main.h"
-#include "render.h"
 #include "image.h"
 #include "dist_queue.h"
 
@@ -46,35 +45,9 @@ private:
 		gimp_pixel_rgn_init(&region, drawable, 0, 0, w, h, FALSE, FALSE);
 		gimp_pixel_rgn_get_rect(&region, img.get(), 0, 0, w, h);
 	}
-	void compute_hull()
-	{
-		multi_point<point_xy> points;
-		gint w = drawable->width;
-		gint h = drawable->height;
-
-		guchar *img = this->img.get();
-		for (int y = 0; y < h; y++)
-		{
-			int g = -1;
-			for (int x = 0; x < w; x++)
-			{
-				if (img[y * w + x] >= 255)
-				{
-					if (g == -1)
-						append(points, make<point_xy>(x, y));
-					g = x;
-				}
-			}
-			if (g >= 0)
-				append(points, make<point_xy>(g, y));
-		}
-
-		convex_hull(points, local_hull);
-
-		// make global hull
-		translate_transformer<int, 2, 2> translate(pos.x(), pos.y());
-		transform(local_hull, hull, translate);
-	}
+	void compute_hull();
+	
+	
 	void extract_drawable_infos(gint32 drawable_id)
 	{
 		drawable = gimp_drawable_get(drawable_id);

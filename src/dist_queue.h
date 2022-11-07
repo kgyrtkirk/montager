@@ -1,5 +1,4 @@
-#ifndef __DIST_QUEUE_H__
-#define __DIST_QUEUE_H__
+#pragma once
 
 #include <functional>
 #include <queue>
@@ -109,5 +108,3 @@ public:
         return (sec->last_dist - top->last_dist)/2;
     }
 };
-
-#endif

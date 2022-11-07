@@ -20,7 +20,9 @@ endif(CCACHE_FOUND)
 file(GLOB core_SRC
     "src/*.h"
     "src/interface.cpp"
-    "src/render.cpp"
+    "src/pmontage.cpp"
+    "src/pimage.cpp"
+    "src/image.cpp"
 )
 
 
