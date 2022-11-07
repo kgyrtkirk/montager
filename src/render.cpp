@@ -23,17 +23,19 @@ BOOST_GEOMETRY_REGISTER_BOOST_TUPLE_CS(cs::cartesian)
 using namespace boost::geometry;
 using boost::geometry::model::multi_point;
 using boost::geometry::model::polygon;
-using boost::geometry::model::d2::point_xy;
+// using boost::geometry::model::d2::point_xy;
 using namespace boost::geometry::strategy::transform;
-//using std::shared_ptr;
+using std::shared_ptr;
 
 
 class PImage
 {
+	using point_xy = boost::geometry::model::d2::point_xy<int>;
+	using polygon = boost::geometry::model::polygon<point_xy>;
 	GimpDrawable *drawable;
-	polygon<point_xy<int>> local_hull;
-	point_xy<int> pos;
-	polygon<point_xy<int>> hull;
+	polygon local_hull;
+	point_xy pos;
+	polygon hull;
 	image img;
 
 private:
@@ -55,7 +57,7 @@ private:
 	}
 	void compute_hull()
 	{
-		multi_point<point_xy<int>> points;
+		multi_point<point_xy> points;
 		gint w = drawable->width;
 		gint h = drawable->height;
 
@@ -68,12 +70,12 @@ private:
 				if (img[y * w + x] >= 255)
 				{
 					if (g == -1)
-						append(points, make<point_xy<int>>(x, y));
+						append(points, make<point_xy>(x, y));
 					g = x;
 				}
 			}
 			if (g >= 0)
-				append(points, make<point_xy<int>>(g, y));
+				append(points, make<point_xy>(g, y));
 		}
 
 		convex_hull(points, local_hull);
@@ -87,7 +89,7 @@ private:
 		drawable = gimp_drawable_get(drawable_id);
 		gint x, y;
 		gimp_drawable_offsets(drawable->drawable_id, &x, &y);
-		pos = point_xy<int>(x, y);
+		pos = point_xy(x, y);
 	}
 
 public:
@@ -109,19 +111,19 @@ public:
 	{
 		gimp_drawable_detach(drawable);
 	}
-	const polygon<point_xy<int>> &getHull() const
+	const polygon &getHull() const
 	{
 		return hull;
 	}
 
-	void paint(const point_xy<int> &p)
+	void paint(const point_xy &p)
 	{
 		int x = p.x() - pos.x();
 		int y = p.y() - pos.y();
 		img.paint(t_point(x, y), 254);
 	}
 
-	double distance(const point_xy<int> &p) const
+	double distance(const point_xy &p) const
 	{
 		return boost::geometry::distance(p, hull);
 	}
@@ -138,7 +140,7 @@ public:
 		{
 			for (auto x = 0; x < w; x++)
 			{
-				point_xy<int> p(x, y);
+				point_xy p(x, y);
 				double d = boost::geometry::distance(p, local_hull);
 				guchar v;
 				if (d <= 0.0)
@@ -185,7 +187,7 @@ public:
 				if (v >= 255)
 					continue;
 
-				point_xy<int> p(x, y);
+				point_xy p(x, y);
 				if (within(p, local_hull))
 				{
 					v = 254;

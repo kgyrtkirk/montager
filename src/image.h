@@ -7,7 +7,6 @@
 #include <memory>
 #include <boost/geometry/geometries/point_xy.hpp>
 
-
 // single channel image
 class image
 {
@@ -16,7 +15,6 @@ class image
 	// typename boost::geometry::model::d2::point_xy<T> point_xy<T>;
 	typedef boost::geometry::model::d2::point_xy<int> point_xy;
 	
-
 	gint32 width;
 	gint32 height;
 	std::shared_ptr<guchar> img;
