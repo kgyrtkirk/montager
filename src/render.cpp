@@ -413,7 +413,7 @@ public:
 			gimp_image_select_item(image_id, GIMP_CHANNEL_OP_REPLACE, it->getDrawable()->drawable_id);
 			gimp_selection_shrink(image_id, 3);
 			gimp_image_select_item(image_id, GIMP_CHANNEL_OP_ADD, selection_channel);
-			gimp_item_delete(selection_channel);
+			gimp_image_remove_channel(image_id, selection_channel);
 			selection_channel = gimp_selection_save(image_id);
 		}
 		gimp_selection_load(selection_channel);
