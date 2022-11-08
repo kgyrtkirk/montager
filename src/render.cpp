@@ -425,14 +425,14 @@ public:
 
 		for (auto it = images.begin(); it != images.end(); it++)
 		{
-
 			gimp_selection_none(image_id);
 			gimp_image_select_item(image_id, GIMP_CHANNEL_OP_REPLACE, it->getDrawable()->drawable_id);
 
 			it->cleanup();
 			it->flush();
 
-			// feather works strangely; where >2 this will not work anyway...will get back later
+			// feather works strangely; for >2 are being bleneded this will not work anyway...
+			// so something which kinda looks okay will be good enough for now and I'll get back later if that falls short
 
 			gdouble off = radius / 4;
 			gimp_selection_grow(image_id, off);
