@@ -12,6 +12,9 @@
         "deque": "cpp",
         "list": "cpp",
         "vector": "cpp",
-        "chrono": "cpp"
+        "chrono": "cpp",
+        "memory": "cpp",
+        "streambuf": "cpp",
+        "tuple": "cpp"
     }
 }

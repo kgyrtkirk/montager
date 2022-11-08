@@ -16,7 +16,9 @@ public:
 
         entry(t_point _pos, t_polygon _g, int _image_idx);
 
+        // t_point force_dir(const entry &o) const;
         t_point force_vector(const entry &o) const;
+        // double distance(const entry &o) const;
 
         t_polygon absolute_poly() const;
         t_point absolute_center() const;

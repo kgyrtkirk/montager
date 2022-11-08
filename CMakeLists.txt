@@ -22,6 +22,7 @@ file(GLOB core_SRC
     "src/interface.cpp"
     "src/render.cpp"
     "src/fd_layout.cpp"
+    "src/types.cpp"
 )
 
 
