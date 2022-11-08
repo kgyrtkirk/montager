@@ -121,9 +121,9 @@ public:
 class PImage
 {
 	GimpDrawable *drawable;
-	polygon<point_xy<int>> local_hull;
+	t_polygon local_hull;
 	point_xy<int> pos;
-	polygon<point_xy<int>> hull;
+	t_polygon hull;
 	image img;
 
 private:
@@ -145,7 +145,7 @@ private:
 	}
 	void compute_hull()
 	{
-		multi_point<point_xy<int>> points;
+		multi_point<t_point> points;
 		gint w = drawable->width;
 		gint h = drawable->height;
 
@@ -158,18 +158,18 @@ private:
 				if (img[y * w + x] >= 255)
 				{
 					if (g == -1)
-						append(points, make<point_xy<int>>(x, y));
+						append(points, make<t_point>(x, y));
 					g = x;
 				}
 			}
 			if (g >= 0)
-				append(points, make<point_xy<int>>(g, y));
+				append(points, make<t_point>(g, y));
 		}
 
 		convex_hull(points, local_hull);
 
 		// make global hull
-		translate_transformer<int, 2, 2> translate(pos.x(), pos.y());
+		translate_transformer<double, 2, 2> translate(pos.x(), pos.y());
 		transform(local_hull, hull, translate);
 	}
 	void extract_drawable_infos(gint32 drawable_id)
@@ -199,7 +199,7 @@ public:
 	{
 		gimp_drawable_detach(drawable);
 	}
-	const polygon<point_xy<int>> &getHull() const
+	const t_polygon &getHull() const
 	{
 		return hull;
 	}
@@ -208,7 +208,7 @@ public:
 	{
 		int x = p.x() - pos.x();
 		int y = p.y() - pos.y();
-		img.paint(t_point(x, y), 254);
+		img.paint(point_xy<int>(x, y), 254);
 	}
 
 	double distance(const point_xy<int> &p) const
@@ -367,12 +367,12 @@ public:
 					continue;
 
 				// snake-alike space filling curve; do provide |p-p'|=1 invariant
-				point_xy<int> p(x, y);
+				t_point p(x, y);
 
 				auto m = dq.min(p);
 				int minPos = m->image_idx;
 				double r = dq.min_radius(p);
-				aimg.fill_circle(p, r, minPos + 1);
+				aimg.fill_circle(point_xy<int>(p.x(),p.y()), r, minPos + 1);
 			}
 		}
 
