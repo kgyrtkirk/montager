@@ -92,7 +92,6 @@ query(void)
   // gimp_plugin_help_register ("http://developer.gimp.org/plug-in-template/help",
   //                            help_uri);
 
-
   gimp_install_procedure(PROCEDURE_SHOW_HULLS,
                          "Shows the convex hulls of the layers",
                          "Help",
@@ -205,7 +204,13 @@ run(const gchar *name,
   }
   if (strcmp(name, PROCEDURE_CROSSFADE_EDGES) == 0)
   {
-    render(image_ID, MontageMode::CROSSFADE_EDGES);
+    gimp_get_data(DATA_KEY_VALS, &vals);
+    gimp_get_data(DATA_KEY_UI_VALS, &ui_vals);
+
+    if (dialog(image_ID, drawable, &vals, &image_vals, &drawable_vals, &ui_vals))
+    {
+      render(image_ID, MontageMode::CROSSFADE_EDGES);
+    }
   }
   gimp_image_undo_group_end(image_ID);
 

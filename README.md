@@ -51,3 +51,5 @@ testrun1:	8000x5000	~30 image
 
 testrun2; +dist_queue
 14:59 ~ 15:27	
+
+* spent around 2-3 hours(!) moving out classes from 'render.cpp' ; but the compilation have slowed down - and even autocomplete stopped working (not that it was a breeze working with it even before...but not getting completion for gimp_... methods would make this really slow...so I ditched all these efforts...

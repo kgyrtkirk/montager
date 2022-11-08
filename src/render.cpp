@@ -511,8 +511,6 @@ void render(gint32 image_ID, MontageMode mode)
 		montage.select_edges();
 		break;
 	case MontageMode::CROSSFADE_EDGES:
-		// montage.show_hulls();
-		// montage.flush();
 		montage.crossfade(30);
 		break;
 	default:
