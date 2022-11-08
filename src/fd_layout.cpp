@@ -21,10 +21,10 @@ fd_layout::entry::entry(t_point _pos, t_polygon _g, int _image_idx) : position(_
 //     return v * (1.0 / l);
 // }
 
-// double fd_layout::entry::distance(const entry &o) const
-// {
-//     return distance(absolute_poly(), o.absolute_poly());
-// }
+double fd_layout::entry::distance(const entry &o) const
+{
+    return distance(absolute_poly(), o.absolute_poly());
+}
 t_point fd_layout::entry::force_vector(const entry &o) const
 {
     double d = distance(absolute_poly(), o.absolute_poly());
