@@ -35,7 +35,7 @@ static void run(const gchar *name,
 
 const PlugInVals default_vals =
     {
-        0,
+        30,
         1,
         2,
         0,
@@ -180,39 +180,51 @@ run(const gchar *name,
   drawable = gimp_drawable_get(param[2].data.d_drawable);
 
   /*  Initialize with default values  */
-  vals = default_vals;
-  image_vals = default_image_vals;
-  drawable_vals = default_drawable_vals;
-  ui_vals = default_ui_vals;
+  if (gimp_get_data_size(DATA_KEY_VALS) != sizeof(vals) || !gimp_get_data(DATA_KEY_VALS, &vals))
+  {
+    vals = default_vals;
+  }
 
-  gimp_image_undo_group_start(image_ID);
-  if (strcmp(name, PROCEDURE_SHOW_HULLS) == 0)
+  if (run_mode == GIMP_RUN_INTERACTIVE)
   {
-    render(image_ID, MontageMode::SHOW_HULLS,&vals);
-  }
-  if (strcmp(name, PROCEDURE_COMPUTE_VORONOI) == 0)
-  {
-    render(image_ID, MontageMode::VORONOI,&vals);
-  }
-  if (strcmp(name, PROCEDURE_CLEANUP_MASKS) == 0)
-  {
-    render(image_ID, MontageMode::CLEANUP_MASKS,&vals);
-  }
-  if (strcmp(name, PROCEDURE_SELECT_EDGES) == 0)
-  {
-    render(image_ID, MontageMode::SELECT_EDGES,&vals);
-  }
-  if (strcmp(name, PROCEDURE_CROSSFADE_EDGES) == 0)
-  {
-    gimp_get_data(DATA_KEY_VALS, &vals);
-    gimp_get_data(DATA_KEY_UI_VALS, &ui_vals);
-
-    if (dialog(image_ID, drawable, &vals, &image_vals, &drawable_vals, &ui_vals))
+    if (strcmp(name, PROCEDURE_CROSSFADE_EDGES) == 0)
     {
-      render(image_ID, MontageMode::CROSSFADE_EDGES ,&vals);
+      if (dialog(image_ID, drawable, &vals, &image_vals, &drawable_vals, &ui_vals))
+      {
+        gimp_set_data(DATA_KEY_VALS, &vals, sizeof(vals));
+      }
+      else
+      {
+        status = GIMP_PDB_CANCEL;
+      }
     }
   }
-  gimp_image_undo_group_end(image_ID);
+
+  if (status == GIMP_PDB_SUCCESS)
+  {
+    gimp_image_undo_group_start(image_ID);
+    if (strcmp(name, PROCEDURE_SHOW_HULLS) == 0)
+    {
+      render(image_ID, MontageMode::SHOW_HULLS, &vals);
+    }
+    if (strcmp(name, PROCEDURE_COMPUTE_VORONOI) == 0)
+    {
+      render(image_ID, MontageMode::VORONOI, &vals);
+    }
+    if (strcmp(name, PROCEDURE_CLEANUP_MASKS) == 0)
+    {
+      render(image_ID, MontageMode::CLEANUP_MASKS, &vals);
+    }
+    if (strcmp(name, PROCEDURE_SELECT_EDGES) == 0)
+    {
+      render(image_ID, MontageMode::SELECT_EDGES, &vals);
+    }
+    if (strcmp(name, PROCEDURE_CROSSFADE_EDGES) == 0)
+    {
+      render(image_ID, MontageMode::CROSSFADE_EDGES, &vals);
+    }
+    gimp_image_undo_group_end(image_ID);
+  }
 
   if (run_mode != GIMP_RUN_NONINTERACTIVE)
     gimp_displays_flush();
