@@ -12,19 +12,15 @@ fd_layout::entry::entry(t_point _pos, t_polygon _g, int _image_idx) : position(_
     cout << "centroid:" << dsv(center) << endl;
 }
 
-// t_point fd_layout::entry::force_dir(const entry &o) const
-// {
-//     t_point v =  (o.position + o.center) - (position + center);
-//     double l = distance(t_point(0, 0), v);
-//     if (l <= 0.0)
-//         return t_point(0, 0);
-//     return v * (1.0 / l);
-// }
-
-double fd_layout::entry::distance(const entry &o) const
+t_point fd_layout::entry::force_dir(const entry &o) const
 {
-    return distance(absolute_poly(), o.absolute_poly());
+    t_point v =  (o.position + o.center) - (position + center);
+    double l = distance(t_point(0, 0), v);
+    if (l <= 0.0)
+        return t_point(0, 0);
+    return v * (1.0 / l);
 }
+
 t_point fd_layout::entry::force_vector(const entry &o) const
 {
     double d = distance(absolute_poly(), o.absolute_poly());
@@ -34,6 +30,11 @@ t_point fd_layout::entry::force_vector(const entry &o) const
     if (d <= 0.0 || l <= 0.0)
         return t_point(0, 0);
     return v * (d / l);
+}
+
+double fd_layout::entry::distance1(const entry &o) const
+{
+    return distance(absolute_poly(), o.absolute_poly());
 }
 
 t_polygon fd_layout::entry::absolute_poly() const
