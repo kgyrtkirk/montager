@@ -11,6 +11,7 @@ enum MontageMode
 	CLEANUP_MASKS,
 	SELECT_EDGES,
 	CROSSFADE_EDGES,
+	AUTO_LAYOUT,
 };
 
 void render(gint32 image_ID, MontageMode mode, PlugInVals *vals);

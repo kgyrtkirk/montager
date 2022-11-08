@@ -442,6 +442,17 @@ public:
 			gimp_selection_shrink(image_id, off);
 		}
 	}
+	void layout()
+	{
+		// the underlying problem here is effectively: how to pack polygons efficiently
+		// I think throwing in a force directed approach would probably be good enough?
+		// probably a good idea would be to put the larger ones in the center?
+		// I have distance from boost; but no vector - although somewhat inaccurate ; but I could use the centroid vector
+		// if the user is able to run the algorithm; then change the layout;
+		//   after which he can continue running the algo again - the user could work together with algo to end up with the desired result!
+		g_error("yes it works up to here");
+
+	}
 
 	void flush()
 	{
@@ -512,6 +523,9 @@ void render(gint32 image_ID, MontageMode mode, PlugInVals*vals)
 		break;
 	case MontageMode::CROSSFADE_EDGES:
 		montage.crossfade(vals->dummy1);
+		break;
+	case MontageMode::AUTO_LAYOUT:
+		montage.layout();
 		break;
 	default:
 		g_error("unhandled switch branch");
