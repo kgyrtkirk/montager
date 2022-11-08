@@ -22,6 +22,9 @@ using boost::geometry::model::d2::point_xy;
 using namespace boost::geometry::strategy::transform;
 using std::shared_ptr;
 
+typedef boost::geometry::model::d2::point_xy<int> t_point;
+typedef boost::geometry::model::polygon<t_point> t_polygon;
+
 class dist_queue
 {
 public:
