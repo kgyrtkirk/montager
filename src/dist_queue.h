@@ -1,6 +1,8 @@
 #ifndef __DIST_QUEUE_H__
 #define __DIST_QUEUE_H__
 
+#include "types.h"
+
 #include <functional>
 #include <queue>
 #include <vector>

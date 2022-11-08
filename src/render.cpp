@@ -350,6 +350,7 @@ public:
 
 		for (int i = 0; i < images.size(); i++)
 		{
+			// FIXME: this seem to be leaking... :D
 			dq.add(new dist_queue::entry(images[i].getHull(), i));
 		}
 
@@ -452,13 +453,13 @@ public:
 		//   after which he can continue running the algo again - the user could work together with algo to end up with the desired result!
 		g_error("yes it works up to here");
 
+
 	}
 
 	void flush()
 	{
 		for (auto it = images.begin(); it != images.end(); it++)
 		{
-			// 	it->show_distance();
 			it->flush();
 		}
 	}
