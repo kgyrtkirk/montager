@@ -75,7 +75,6 @@ dialog(gint32 image_ID,
 
   row = 0;
 
-g_message("asd %d",__LINE__);
   adj = gimp_scale_entry_new(GTK_TABLE(table), 0, row++,
                              "Feather:", SCALE_WIDTH, SPIN_BUTTON_WIDTH,
                              vals->dummy1, 0, 1000, 1, 10, 0,

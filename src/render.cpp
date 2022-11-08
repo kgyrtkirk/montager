@@ -454,7 +454,7 @@ public:
 };
 
 /*  Public functions  */
-void render(gint32 image_ID, MontageMode mode)
+void render(gint32 image_ID, MontageMode mode, PlugInVals*vals)
 {
 	gimp_progress_init(PLUGIN_NAME);
 
@@ -511,7 +511,7 @@ void render(gint32 image_ID, MontageMode mode)
 		montage.select_edges();
 		break;
 	case MontageMode::CROSSFADE_EDGES:
-		montage.crossfade(30);
+		montage.crossfade(vals->dummy1);
 		break;
 	default:
 		g_error("unhandled switch branch");

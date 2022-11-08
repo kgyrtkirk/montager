@@ -188,19 +188,19 @@ run(const gchar *name,
   gimp_image_undo_group_start(image_ID);
   if (strcmp(name, PROCEDURE_SHOW_HULLS) == 0)
   {
-    render(image_ID, MontageMode::SHOW_HULLS);
+    render(image_ID, MontageMode::SHOW_HULLS,&vals);
   }
   if (strcmp(name, PROCEDURE_COMPUTE_VORONOI) == 0)
   {
-    render(image_ID, MontageMode::VORONOI);
+    render(image_ID, MontageMode::VORONOI,&vals);
   }
   if (strcmp(name, PROCEDURE_CLEANUP_MASKS) == 0)
   {
-    render(image_ID, MontageMode::CLEANUP_MASKS);
+    render(image_ID, MontageMode::CLEANUP_MASKS,&vals);
   }
   if (strcmp(name, PROCEDURE_SELECT_EDGES) == 0)
   {
-    render(image_ID, MontageMode::SELECT_EDGES);
+    render(image_ID, MontageMode::SELECT_EDGES,&vals);
   }
   if (strcmp(name, PROCEDURE_CROSSFADE_EDGES) == 0)
   {
@@ -209,7 +209,7 @@ run(const gchar *name,
 
     if (dialog(image_ID, drawable, &vals, &image_vals, &drawable_vals, &ui_vals))
     {
-      render(image_ID, MontageMode::CROSSFADE_EDGES);
+      render(image_ID, MontageMode::CROSSFADE_EDGES ,&vals);
     }
   }
   gimp_image_undo_group_end(image_ID);
