@@ -8,6 +8,8 @@
 
 BOOST_GEOMETRY_REGISTER_BOOST_TUPLE_CS(cs::cartesian)
 
+using namespace std;
+
 typedef struct
 {
   //   OtherObject *helper;
@@ -69,6 +71,8 @@ test_layout(MyObjectFixture *fixture,
   auto e1 = fd_layout::entry(t_point(0, 0), poly1, 1);
   auto e2 = fd_layout::entry(t_point(10, 0), poly1, 1);
 
+  auto d = e1.force_vector(e2);
+  cout << dsv(d) << endl;
 
   layout.add(&e1);
   layout.add(&e2);
