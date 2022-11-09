@@ -31,6 +31,9 @@ using boost::geometry::model::d2::point_xy;
 using namespace boost::geometry::strategy::transform;
 using std::shared_ptr;
 
+// FIXME: migrate to drawable usage
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 // single channel image
 class image
 {
