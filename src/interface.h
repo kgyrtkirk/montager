@@ -1,10 +1,5 @@
-#ifndef __INTERFACE_H__
-#define __INTERFACE_H__
+#pragma once
 
+#include "main.h"
 
-/*  Public functions  */
-
-gboolean   dialog (PlugInVals         *vals);
-
-
-#endif /* __INTERFACE_H__ */
+gboolean dialog(PlugInVals *vals);
