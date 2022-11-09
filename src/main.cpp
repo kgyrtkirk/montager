@@ -44,22 +44,7 @@ const PlugInVals default_vals =
         0,
         FALSE};
 
-const PlugInImageVals default_image_vals =
-    {
-        0};
-
-const PlugInDrawableVals default_drawable_vals =
-    {
-        0};
-
-const PlugInUIVals default_ui_vals =
-    {
-        TRUE};
-
 static PlugInVals vals;
-static PlugInImageVals image_vals;
-static PlugInDrawableVals drawable_vals;
-static PlugInUIVals ui_vals;
 
 GimpPlugInInfo PLUG_IN_INFO =
     {
@@ -170,7 +155,7 @@ query(void)
 
 static void
 run(const gchar *name,
-    gint n_params,
+    gint /*n_params*/,
     const GimpParam *param,
     gint *nreturn_vals,
     GimpParam **return_vals)
