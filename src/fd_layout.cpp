@@ -86,12 +86,12 @@ fd_layout::fd_layout(int width, int height)
 
 void fd_layout::run()
 {
-    gimp_progress_set_text("layout");
+    // gimp_progress_set_text("layout");
 
     int n = 30;
     for (int i = 0; i < n; i++)
     {
-        gimp_progress_update(i * 1.0 / n);
+        // gimp_progress_update(i * 1.0 / n);
         step(max_step * (n - i) / n);
     }
 }

@@ -11,26 +11,8 @@ BOOST_GEOMETRY_REGISTER_BOOST_TUPLE_CS(cs::cartesian)
 using namespace std;
 using namespace montager;
 
-typedef struct
-{
-  //   OtherObject *helper;
-} MyObjectFixture;
-
 static void
-my_object_fixture_set_up(MyObjectFixture *fixture,
-                         gconstpointer user_data)
-{
-}
-
-static void
-my_object_fixture_tear_down(MyObjectFixture *fixture,
-                            gconstpointer user_data)
-{
-}
-
-static void
-test_dist_queue_min(MyObjectFixture *fixture,
-                    gconstpointer user_data)
+test_dist_queue_min(void *, gconstpointer)
 {
   t_polygon poly;
   t_polygon poly2;
@@ -60,8 +42,7 @@ test_dist_queue_min(MyObjectFixture *fixture,
 }
 
 static void
-test_layout_entry(MyObjectFixture *fixture,
-                  gconstpointer user_data)
+test_layout_entry(void *, gconstpointer)
 {
   t_polygon poly1;
   t_polygon poly2;
@@ -92,8 +73,7 @@ test_layout_entry(MyObjectFixture *fixture,
 }
 
 static void
-test_layout(MyObjectFixture *fixture,
-            gconstpointer user_data)
+test_layout(void *, gconstpointer)
 {
   t_polygon poly1;
   t_polygon poly2;
@@ -108,14 +88,13 @@ test_layout(MyObjectFixture *fixture,
   layout.run();
   cout << "pos:" << dsv(e1.position) << endl;
 
-  // g_assert(-1 < e1.position.x() -50.0 && e1.position.x() -50.0 < 1);
-  // g_assert(-1 < e1.position.y() -50.0 && e1.position.y() -50.0 < 1);
+  g_assert(-1 < e1.position.x() -50.0 && e1.position.x() -50.0 < 1);
+  g_assert(-1 < e1.position.y() -50.0 && e1.position.y() -50.0 < 1);
 }
 
 // same polygon at same location
 static void
-test_layout2(MyObjectFixture *fixture,
-            gconstpointer user_data)
+test_layout2(void *, gconstpointer)
 {
   t_polygon poly1;
   t_polygon poly2;
@@ -133,7 +112,6 @@ test_layout2(MyObjectFixture *fixture,
 
   // g_assert(-1 < e1.position.x() -100.0 && e1.position.x() -50.0 < 1);
   // g_assert(-1 < e1.position.y() -50.0 && e1.position.y() -50.0 < 1);
-
 }
 
 int main(int argc, char *argv[])
@@ -142,19 +120,13 @@ int main(int argc, char *argv[])
 
   g_test_init(&argc, &argv, NULL);
 
-  // Define the tests.
-  g_test_add("/dist_queue/min", MyObjectFixture, "some-user-data",
-             my_object_fixture_set_up, test_dist_queue_min,
-             my_object_fixture_tear_down);
-  g_test_add("/layout/entry", MyObjectFixture, "some-user-data",
-             my_object_fixture_set_up, test_layout_entry,
-             my_object_fixture_tear_down);
-  g_test_add("/layout/main", MyObjectFixture, "some-user-data",
-             my_object_fixture_set_up, test_layout,
-             my_object_fixture_tear_down);
-  g_test_add("/layout/main2", MyObjectFixture, "some-user-data",
-             my_object_fixture_set_up, test_layout2,
-             my_object_fixture_tear_down);
+#define TEST(METHOD) \
+  g_test_add("/" #METHOD, void, 0, 0, METHOD, 0);
+
+  TEST(test_dist_queue_min)
+  TEST(test_layout_entry)
+  TEST(test_layout)
+  TEST(test_layout2)
 
   return g_test_run();
 }
