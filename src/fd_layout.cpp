@@ -2,8 +2,12 @@
 #include <boost/geometry.hpp>
 #include <iostream>
 
+
+using namespace montager;
 using namespace std;
-using namespace boost::geometry;
+using boost::geometry::distance;
+using boost::geometry::dsv;
+using boost::geometry::transform;
 using boost::geometry::strategy::transform::translate_transformer;
 
 fd_layout::entry::entry(t_point _pos, t_polygon _g, int _image_idx, bool _freeze) : position(_pos), g(_g), image_idx(_image_idx), freeze(_freeze)
@@ -88,7 +92,7 @@ void fd_layout::run()
     int n = 30;
     for (int i = 0; i < n; i++)
     {
-		gimp_progress_update(i * 1.0 / n);
+        gimp_progress_update(i * 1.0 / n);
         step(max_step * (n - i) / n);
     }
 }
@@ -124,11 +128,12 @@ t_point fd_layout::compute_force(entry *l, entry *r)
     {
         d = .00000000001 * (random() % 1000);
     }
-    return dir * (-10000/(10+d) / max_step);
+    return dir * (-10000 / (10 + d) / max_step);
 }
 
 t_polygon guard(int idx, double w, double h)
 {
+    using namespace boost::geometry;
     using namespace boost::geometry::strategy::transform;
     using boost::geometry::model::multi_point;
 
@@ -141,7 +146,7 @@ t_polygon guard(int idx, double w, double h)
     points.push_back(t_point(-L, L));
     convex_hull(points, p);
     p_temp = p;
-    boost::geometry::transform(p_temp, p, rotate_transformer<boost::geometry::degree, double, 2, 2>(90.0 * idx));
+    transform(p_temp, p, rotate_transformer<boost::geometry::degree, double, 2, 2>(90.0 * idx));
     p_temp = p;
     transform(p_temp, p, translate_transformer<double, 2, 2>(1, 1));
     p_temp = p;

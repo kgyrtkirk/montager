@@ -4,6 +4,9 @@
 
 std::vector<t_polygon> guard_polys(int w, int h);
 
+
+namespace montager {
+
 class fd_layout
 {
 public:
@@ -43,4 +46,6 @@ public:
     
     void step(double step_size);
     void run();
+};
+
 };

@@ -56,3 +56,12 @@ testrun2; +dist_queue
 
 
 https://cs.brown.edu/people/rtamassi/gdhandbook/chapters/force-directed.pdf
+
+In file included from /usr/include/boost/math/tools/cxx03_warn.hpp:9,
+                 from /usr/include/boost/math/constants/constants.hpp:11,
+                 from /usr/include/boost/geometry/util/math.hpp:29,
+                 from /usr/include/boost/geometry/core/radian_access.hpp:33,
+                 from /usr/include/boost/geometry/geometry.hpp:51,
+                 from /usr/include/boost/geometry.hpp:17,
+                 from /home/kirk/projects/montage-gen2/src/fd_layout.cpp:2:
+/usr/include/boost/detail/no_exceptions_support.hpp:17:1: note: ‘#pragma message: This header is deprecated. Use <boost/core/no_exceptions_support.hpp> instead.’

@@ -20,6 +20,7 @@
 
 BOOST_GEOMETRY_REGISTER_BOOST_TUPLE_CS(cs::cartesian)
 
+using namespace montager;
 using namespace boost::geometry;
 using boost::geometry::model::multi_point;
 using boost::geometry::model::polygon;

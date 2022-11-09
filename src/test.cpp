@@ -9,6 +9,7 @@
 BOOST_GEOMETRY_REGISTER_BOOST_TUPLE_CS(cs::cartesian)
 
 using namespace std;
+using namespace montager;
 
 typedef struct
 {
