@@ -7,6 +7,7 @@
 #include "main.h"
 #include "render.h"
 #include "dist_queue.h"
+#include "fd_layout.h"
 
 #include <iostream>
 
@@ -120,6 +121,7 @@ public:
 
 class PImage
 {
+	gint32 layer_id;
 	GimpDrawable *drawable;
 	t_polygon local_hull;
 	point_xy<int> pos;
@@ -127,6 +129,7 @@ class PImage
 	image img;
 
 private:
+
 	void read_image()
 	{
 		gint bpp = drawable->bpp;
@@ -181,7 +184,7 @@ private:
 	}
 
 public:
-	PImage(gint32 drawable_id)
+	PImage(gint32 _layer_id,gint32 drawable_id) : layer_id(_layer_id)
 	{
 		extract_drawable_infos(drawable_id);
 		read_image();
@@ -193,15 +196,32 @@ public:
 		img = other.img;
 		local_hull = other.local_hull;
 		hull = other.hull;
+		layer_id = other.layer_id;
 	};
 
 	~PImage()
 	{
 		gimp_drawable_detach(drawable);
 	}
+	point_xy<int> getPos() { return pos; }
+	void setPos(const t_point &p)
+	{
+		point_xy<int> new_pos(p.x(),p.y());
+		point_xy<int> off(new_pos.x()-pos.x(),new_pos.y()-pos.y());
+		// gimp_drawable_offset(drawable->drawable_id, false, GimpOffsetType::GIMP_OFFSET_BACKGROUND, off.x(), off.y());
+		
+		pos=new_pos;
+		// gimp_layer_set_offsets(drawable->drawable_id,pos.x(),pos.y());
+		gimp_layer_set_offsets(layer_id,pos.x(),pos.y());
+	}
 	const t_polygon &getHull() const
 	{
 		return hull;
+	}
+
+	const t_polygon &getLocalHull() const
+	{
+		return local_hull;
 	}
 
 	void paint(const point_xy<int> &p)
@@ -372,7 +392,7 @@ public:
 				auto m = dq.min(p);
 				int minPos = m->image_idx;
 				double r = dq.min_radius(p);
-				aimg.fill_circle(point_xy<int>(p.x(),p.y()), r, minPos + 1);
+				aimg.fill_circle(point_xy<int>(p.x(), p.y()), r, minPos + 1);
 			}
 		}
 
@@ -451,7 +471,39 @@ public:
 		// I have distance from boost; but no vector - although somewhat inaccurate ; but I could use the centroid vector
 		// if the user is able to run the algorithm; then change the layout;
 		//   after which he can continue running the algo again - the user could work together with algo to end up with the desired result!
-		g_error("yes it works up to here");
+		// g_error("yes it works up to here");
+		fd_layout layout(width, height);
+
+		for (int i = 0; i < images.size(); i++)
+		{
+			PImage &image = images[i];
+			t_point p(image.getPos().x(),image.getPos().y());
+			// FIXME: this seem to be leaking... :D
+			std::cout << "pos:" << dsv(p) << std::endl;
+			layout.add(new fd_layout::entry(p, image.getLocalHull(), i));
+		}
+		layout.run();
+		// layout.step(100);
+		
+		for (auto it=layout.elements.begin();it!=layout.elements.end();it++)
+		{
+			auto e=*it;
+			if(e->image_idx<0) {
+				continue;
+			}
+			auto image = images[e->image_idx];
+			std::cout << "pos:" << dsv(e->position) << std::endl;
+			image.setPos(e->position);
+
+
+			// // gimp_drawable_offset(
+
+			// // gimp_item_set_pos
+			// // e->position.x();
+			// t_point p(image.getPos().x(),image.getPos().y());
+			// // FIXME: this seem to be leaking... :D
+			// layout.add(new fd_layout::entry(p, image.getLocalHull(), i));
+		}
 
 
 	}
@@ -466,7 +518,7 @@ public:
 };
 
 /*  Public functions  */
-void render(gint32 image_ID, MontageMode mode, PlugInVals*vals)
+void render(gint32 image_ID, MontageMode mode, PlugInVals *vals)
 {
 	gimp_progress_init(PLUGIN_NAME);
 
@@ -486,6 +538,7 @@ void render(gint32 image_ID, MontageMode mode, PlugInVals*vals)
 		{
 			continue;
 		}
+
 		gchar *name = gimp_drawable_get_name(layers[i]);
 		gint32 mask = gimp_layer_get_mask(layers[i]);
 		if (mask < 0)
@@ -497,7 +550,7 @@ void render(gint32 image_ID, MontageMode mode, PlugInVals*vals)
 		gimp_progress_set_text(name);
 		gimp_progress_update(i * 1.0 / num_layers);
 
-		PImage mi(mask);
+		PImage mi(layer, mask);
 		mi.debug();
 		montage.add(mi);
 	}
