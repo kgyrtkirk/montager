@@ -85,6 +85,11 @@ test_layout(void *, gconstpointer)
   auto e2 = fd_layout::entry(t_point(0, 0), poly1, 1);
   layout.add(&e1);
 
+  cout << "pos0:" << dsv(e1.position) << endl;
+  layout.step(1);
+  cout << "pos1:" << dsv(e1.position) << endl;
+  layout.step(10);
+  cout << "pos1:" << dsv(e1.position) << endl;
   layout.run(progress::dummy());
   cout << "pos:" << dsv(e1.position) << endl;
 

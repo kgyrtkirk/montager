@@ -73,7 +73,7 @@ t_point fd_layout::entry::absolute_center() const
 
 fd_layout::fd_layout(int width, int height)
 {
-    max_step = (width + height) / 4;
+    max_step = max(width , height)/10;
     auto guards = guard_polys(width, height);
     for (auto it = guards.begin(); it != guards.end(); it++)
     {
@@ -87,11 +87,16 @@ void fd_layout::run(const progress::progress_handler &progress)
 {
     progress.name("layout");
 
-    int n = 30;
+    int n = 100;
     for (int i = 0; i < n; i++)
     {
         progress.update(i * 1.0 / n);
-        step(max_step * (n - i) / n);
+        double size=n-i;
+        size/=n-1;
+        size=pow(size,2);
+        // if(i<n/2)size=.5;
+        // else size=.01;
+        step(max_step * size);
     }
 }
 
@@ -140,9 +145,13 @@ t_point fd_layout::compute_force(entry *l, entry *r)
         // double mag=(-10000 / (30 + d*d) / max_step);
         int O = 50;
         // double mag = (-O / (O + d * d));
-        double mag = (-O / (O + d));
+        double mag = (-O / (O + pow(d,1)));
         // return dir * mag;
-         return dir * (-10000 / (10 + d) / max_step);
+        double s = 
+        (l->freeze || r->freeze) ?
+            pow(elements.size(),.25): 1; 
+        return dir * mag * s;
+        //  return dir * (-10000 * s / (30 + d) / max_step);
 
     }
 }

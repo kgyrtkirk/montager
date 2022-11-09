@@ -125,7 +125,14 @@ public:
 	}
 };
 
-class PImage
+// class Positionable
+// {
+// public:
+// 	virtual void setPos(point_xy<int> pos);
+// 	virtual point_xy<int> getPos() const;
+// };
+
+class PImage //: public Positionable
 {
 	gint32 layer_id;
 	GimpDrawable *drawable;

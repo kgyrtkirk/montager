@@ -25,7 +25,8 @@ namespace montager
         {
         public:
             void name(const char *n) const { gimp_progress_set_text(n); }
-            void update(double state) const { gimp_progress_update(state); }
+            void update(double state) const { gimp_progress_update(state);    gimp_displays_flush();
+ }
         };
     };
 };
