@@ -4,6 +4,7 @@
 
 #include <libgimp/gimp.h>
 
+
 #include "main.h"
 #include "render.h"
 #include "dist_queue.h"
@@ -438,7 +439,7 @@ public:
 			gimp_image_remove_channel(image_id, selection_channel);
 			selection_channel = gimp_selection_save(image_id);
 		}
-		gimp_selection_load(selection_channel);
+		gimp_image_select_item(image_id,GIMP_CHANNEL_OP_REPLACE,selection_channel);
 		gimp_item_delete(selection_channel);
 	}
 	void crossfade(gdouble radius)
@@ -475,7 +476,7 @@ public:
 		// g_error("yes it works up to here");
 		fd_layout layout(width, height);
 
-		for (int i = 0; i < images.size(); i++)
+		for (uint64_t i = 0; i < images.size(); i++)
 		{
 			PImage &image = images[i];
 			t_point p(image.getPos().x(),image.getPos().y());
@@ -531,7 +532,7 @@ void render(gint32 image_ID, MontageMode mode, PlugInVals *vals)
 	for (int i = 0; i < num_layers; i++)
 	{
 		gint32 layer = layers[i];
-		if (!gimp_drawable_get_visible(layer))
+		if (!gimp_item_get_visible(layer))
 		{
 			continue;
 		}
@@ -540,7 +541,7 @@ void render(gint32 image_ID, MontageMode mode, PlugInVals *vals)
 			continue;
 		}
 
-		gchar *name = gimp_drawable_get_name(layers[i]);
+		gchar *name = gimp_item_get_name(layers[i]);
 		gint32 mask = gimp_layer_get_mask(layers[i]);
 		if (mask < 0)
 		{
