@@ -2,7 +2,6 @@
 #include <boost/geometry.hpp>
 #include <iostream>
 
-
 using namespace montager;
 using namespace std;
 using boost::geometry::distance;
@@ -104,9 +103,9 @@ void fd_layout::step(double step_size)
         (*it)->reset();
     }
 
-    for (int i = 0; i < elements.size(); i++)
+    for (uint64_t i = 0; i < elements.size(); i++)
     {
-        for (int j = i + 1; j < elements.size(); j++)
+        for (uint64_t j = i + 1; j < elements.size(); j++)
         {
             t_point f = compute_force(elements[i], elements[j]);
             f = f * step_size;

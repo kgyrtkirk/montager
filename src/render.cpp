@@ -587,11 +587,11 @@ void render(gint32 image_ID, MontageMode mode, PlugInVals *vals)
 		break;
 	}
 	boost::chrono::high_resolution_clock::time_point t2 = boost::chrono::high_resolution_clock::now();
-	printf("init time: %d\n", (boost::chrono::duration_cast<boost::chrono::milliseconds>(t1 - t0)));
-	printf("execution time: %d\n", (boost::chrono::duration_cast<boost::chrono::milliseconds>(t2 - t1)));
+	printf("init time: %ld\n", (boost::chrono::duration_cast<boost::chrono::milliseconds>(t1 - t0)).count());
+	printf("execution time: %ld\n", (boost::chrono::duration_cast<boost::chrono::milliseconds>(t2 - t1)).count());
 
 	free(layers);
 
-	g_message("montager finished %dms", boost::chrono::duration_cast<boost::chrono::milliseconds>(t2 - t0));
+	g_message("montager finished %ldms", boost::chrono::duration_cast<boost::chrono::milliseconds>(t2 - t0).count());
 	gimp_progress_end();
 }
