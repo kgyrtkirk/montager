@@ -1,10 +1,10 @@
 #include "config.h"
+#include "main.h"
+#include "interface.h"
 
 #include <libgimp/gimp.h>
 #include <libgimp/gimpui.h>
 
-#include "main.h"
-#include "interface.h"
 
 /*  Constants  */
 
@@ -25,26 +25,15 @@ static PlugInUIVals *ui_state = NULL;
 /*  Public functions  */
 
 gboolean
-dialog(gint32 image_ID,
-       GimpDrawable *drawable,
-       PlugInVals *vals,
-       PlugInImageVals *image_vals2,
-       PlugInDrawableVals *drawable_vals2,
-       PlugInUIVals *ui_vals2)
+dialog(PlugInVals *vals)
 {
   GtkWidget *dlg;
   GtkWidget *main_vbox;
   GtkWidget *frame;
   GtkWidget *table;
-  GtkWidget *hbox;
-  GtkWidget *hbox2;
-  GtkWidget *coordinates;
-  GtkWidget *combo;
   GtkObject *adj;
   gint row;
   gboolean run = FALSE;
-  GimpUnit unit;
-  gdouble xres, yres;
 
   gimp_ui_init(PLUGIN_NAME, TRUE);
 

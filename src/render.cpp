@@ -140,7 +140,6 @@ private:
 		gint bpp = drawable->bpp;
 		gint w = drawable->width;
 		gint h = drawable->height;
-		size_t size = w * h * bpp;
 		if (bpp != 1)
 		{
 			g_error("bpp is expected to be 1 at this point; however its: %d", bpp);

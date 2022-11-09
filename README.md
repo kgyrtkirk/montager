@@ -65,3 +65,5 @@ In file included from /usr/include/boost/math/tools/cxx03_warn.hpp:9,
                  from /usr/include/boost/geometry.hpp:17,
                  from /home/kirk/projects/montage-gen2/src/fd_layout.cpp:2:
 /usr/include/boost/detail/no_exceptions_support.hpp:17:1: note: ‘#pragma message: This header is deprecated. Use <boost/core/no_exceptions_support.hpp> instead.’
+
+...don't know who wrote this nice sample gimp plugin; but I found it very strange to not include required hdrs for struct

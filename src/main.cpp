@@ -176,7 +176,6 @@ run(const gchar *name,
     GimpParam **return_vals)
 {
   static GimpParam values[1];
-  GimpDrawable *drawable;
   gint32 image_ID;
   GimpRunMode run_mode;
   GimpPDBStatusType status = GIMP_PDB_SUCCESS;
@@ -186,7 +185,6 @@ run(const gchar *name,
 
   run_mode = (GimpRunMode)param[0].data.d_int32;
   image_ID = param[1].data.d_int32;
-  drawable = gimp_drawable_get(param[2].data.d_drawable);
 
   /*  Initialize with default values  */
   if (gimp_get_data_size(DATA_KEY_VALS) != sizeof(vals) || !gimp_get_data(DATA_KEY_VALS, &vals))
@@ -198,7 +196,7 @@ run(const gchar *name,
   {
     if (strcmp(name, PROCEDURE_CROSSFADE_EDGES) == 0)
     {
-      if (dialog(image_ID, drawable, &vals, &image_vals, &drawable_vals, &ui_vals))
+      if (dialog(&vals))
       {
         gimp_set_data(DATA_KEY_VALS, &vals, sizeof(vals));
       }
@@ -241,8 +239,6 @@ run(const gchar *name,
 
   if (run_mode != GIMP_RUN_NONINTERACTIVE)
     gimp_displays_flush();
-
-  gimp_drawable_detach(drawable);
 
 
   values[0].type = GIMP_PDB_STATUS;

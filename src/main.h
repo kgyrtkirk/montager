@@ -1,5 +1,9 @@
-#ifndef __MAIN_H__
-#define __MAIN_H__
+#pragma once
+
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#include <libgimp/gimp.h>
+#include <libgimp/gimpui.h>
+#pragma GCC diagnostic pop
 
 typedef struct
 {
@@ -32,4 +36,3 @@ extern const PlugInImageVals default_image_vals;
 extern const PlugInDrawableVals default_drawable_vals;
 extern const PlugInUIVals default_ui_vals;
 
-#endif /* __MAIN_H__ */
