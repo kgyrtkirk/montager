@@ -9,7 +9,7 @@ using boost::geometry::dsv;
 using boost::geometry::transform;
 using boost::geometry::strategy::transform::translate_transformer;
 
-fd_layout::entry::entry(t_point _pos, t_polygon _g, int _image_idx, Positionable *p, bool _freeze) : position(_pos), g(_g), image_idx(_image_idx), freeze(_freeze)
+fd_layout::entry::entry(t_point _pos, t_polygon _g, int _image_idx, Positionable *_item, bool _freeze) : position(_pos), g(_g), image_idx(_image_idx), freeze(_freeze), item(_item)
 {
     boost::geometry::centroid(g, center);
     cout << "centroid:" << dsv(center) << endl;
