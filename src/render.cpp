@@ -125,14 +125,7 @@ public:
 	}
 };
 
-// class Positionable
-// {
-// public:
-// 	virtual void setPos(point_xy<int> pos);
-// 	virtual point_xy<int> getPos() const;
-// };
-
-class PImage //: public Positionable
+class PImage : public Positionable
 {
 	gint32 layer_id;
 	GimpDrawable *drawable;
@@ -217,15 +210,15 @@ public:
 	{
 		gimp_drawable_detach(drawable);
 	}
-	point_xy<int> getPos() { return pos; }
+	point_xy<int> getPos() const { return pos; }
 	void setPos(const t_point &p)
 	{
 		point_xy<int> new_pos(p.x(), p.y());
-		point_xy<int> off(new_pos.x() - pos.x(), new_pos.y() - pos.y());
-		// gimp_drawable_offset(drawable->drawable_id, false, GimpOffsetType::GIMP_OFFSET_BACKGROUND, off.x(), off.y());
-
+		setPos(new_pos);
+	}
+	void setPos(const t_point2i &new_pos)
+	{
 		pos = new_pos;
-		// gimp_layer_set_offsets(drawable->drawable_id,pos.x(),pos.y());
 		gimp_layer_set_offsets(layer_id, pos.x(), pos.y());
 	}
 	const t_polygon &getHull() const
@@ -499,7 +492,7 @@ public:
 			t_point p(image.getPos().x(), image.getPos().y());
 			// FIXME: this seem to be leaking... :D
 			std::cout << "pos:" << dsv(p) << std::endl;
-			layout.add(new fd_layout::entry(p, image.getSimplifiedLocalHull(), i));
+			layout.add(new fd_layout::entry(p, image.getSimplifiedLocalHull(), i, &image));
 		}
 		layout.run(progress::gimp());
 		// layout.step(100);

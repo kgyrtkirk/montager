@@ -9,7 +9,7 @@ using boost::geometry::dsv;
 using boost::geometry::transform;
 using boost::geometry::strategy::transform::translate_transformer;
 
-fd_layout::entry::entry(t_point _pos, t_polygon _g, int _image_idx, bool _freeze) : position(_pos), g(_g), image_idx(_image_idx), freeze(_freeze)
+fd_layout::entry::entry(t_point _pos, t_polygon _g, int _image_idx, Positionable *p, bool _freeze) : position(_pos), g(_g), image_idx(_image_idx), freeze(_freeze)
 {
     boost::geometry::centroid(g, center);
     cout << "centroid:" << dsv(center) << endl;
@@ -73,13 +73,13 @@ t_point fd_layout::entry::absolute_center() const
 
 fd_layout::fd_layout(int width, int height)
 {
-    max_step = max(width , height)/10;
+    max_step = max(width, height) / 10;
     auto guards = guard_polys(width, height);
     for (auto it = guards.begin(); it != guards.end(); it++)
     {
         std::cout << ": " << dsv(*it) << std::endl;
         // FIXME: leak
-        add(new entry(t_point(0, 0), *it, -1, true));
+        add(new entry(t_point(0, 0), *it, -1, NULL, true));
     }
 }
 
@@ -91,9 +91,9 @@ void fd_layout::run(const progress::progress_handler &progress)
     for (int i = 0; i < n; i++)
     {
         progress.update(i * 1.0 / n);
-        double size=n-i;
-        size/=n-1;
-        size=pow(size,2);
+        double size = n - i;
+        size /= n - 1;
+        size = pow(size, 2);
         // if(i<n/2)size=.5;
         // else size=.01;
         step(max_step * size);
@@ -145,14 +145,12 @@ t_point fd_layout::compute_force(entry *l, entry *r)
         // double mag=(-10000 / (30 + d*d) / max_step);
         int O = 50;
         // double mag = (-O / (O + d * d));
-        double mag = (-O / (O + pow(d,1)));
+        double mag = (-O / (O + pow(d, 1)));
         // return dir * mag;
-        double s = 
-        (l->freeze || r->freeze) ?
-            pow(elements.size(),.25): 1; 
+        double s =
+            (l->freeze || r->freeze) ? pow(elements.size(), .25) : 1;
         return dir * mag * s;
         //  return dir * (-10000 * s / (30 + d) / max_step);
-
     }
 }
 

@@ -5,7 +5,18 @@
 
 std::vector<t_polygon> guard_polys(int w, int h);
 
+
 namespace montager {
+
+    class Positionable
+{
+public:
+	virtual void setPos(const t_point2i&pos)=0;
+	virtual t_point2i getPos() const=0;
+    virtual ~Positionable() {};
+};
+
+
 
 class fd_layout
 {
@@ -21,7 +32,7 @@ public:
         int image_idx;
         bool freeze;
 
-        entry(t_point _pos, t_polygon _g, int _image_idx, bool _freeze=false);
+        entry(t_point _pos, t_polygon _g, int _image_idx, Positionable*item, bool _freeze=false);
 
         t_point force_dir(const entry &o) const;
         t_point force_vector(const entry &o) const;

@@ -58,10 +58,10 @@ test_layout_entry(void *, gconstpointer)
   // boost::geometry::read_wkt("POLYGON((-10 -10,10 -10,10 10,-10 10),(-100 -100,100 -100,100 100,-100 100))", poly2);
   // boost::geometry::read_wkt("POLYGON((-10 -10,10 -10,10 10,-10 10))", poly2);
 
-  auto e1 = fd_layout::entry(t_point(0, 0), poly1, 1);
-  auto e2 = fd_layout::entry(t_point(10, 0), poly1, 1);
-  auto e3 = fd_layout::entry(t_point(10, 0), poly2, 1);
-  auto g0 = fd_layout::entry(t_point(0, 0), guards[0], -1);
+  auto e1 = fd_layout::entry(t_point(0, 0), poly1, 1, NULL);
+  auto e2 = fd_layout::entry(t_point(10, 0), poly1, 1, NULL);
+  auto e3 = fd_layout::entry(t_point(10, 0), poly2, 1, NULL);
+  auto g0 = fd_layout::entry(t_point(0, 0), guards[0], -1, NULL);
 
   auto w = e1.distance1(g0);
   auto d = e1.force_dir(g0);
@@ -81,8 +81,8 @@ test_layout(void *, gconstpointer)
   boost::geometry::read_wkt("POLYGON((10 0,11 1,11 0))", poly2);
 
   fd_layout layout(100, 100);
-  auto e1 = fd_layout::entry(t_point(0, 0), poly1, 1);
-  auto e2 = fd_layout::entry(t_point(0, 0), poly1, 1);
+  auto e1 = fd_layout::entry(t_point(0, 0), poly1, 1, NULL);
+  auto e2 = fd_layout::entry(t_point(0, 0), poly1, 1, NULL);
   layout.add(&e1);
 
   cout << "pos0:" << dsv(e1.position) << endl;
@@ -107,8 +107,8 @@ test_layout2(void *, gconstpointer)
   boost::geometry::read_wkt("POLYGON((10 0,11 1,11 0))", poly2);
 
   fd_layout layout(200, 100);
-  auto e1 = fd_layout::entry(t_point(0, 0), poly1, 1);
-  auto e2 = fd_layout::entry(t_point(0, 0), poly1, 1);
+  auto e1 = fd_layout::entry(t_point(0, 0), poly1, 1, NULL);
+  auto e2 = fd_layout::entry(t_point(0, 0), poly1, 1, NULL);
   layout.add(&e1);
   layout.add(&e2);
 
