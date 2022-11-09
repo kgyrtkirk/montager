@@ -83,7 +83,7 @@ fd_layout::fd_layout(int width, int height)
     }
 }
 
-void fd_layout::run(const progress::progress_handler&progress)
+void fd_layout::run(const progress::progress_handler &progress)
 {
     progress.name("layout");
 
@@ -126,19 +126,24 @@ t_point fd_layout::compute_force(entry *l, entry *r)
     {
         d = .00000000001 * (random() % 1000);
     }
-    if(false) {
-
-        double mag=10*log((d+1)/30.0)/max_step;
+    if (false)
+    {
+        double mag = 10 * log((d + 1) / 30.0) / max_step;
         // if (mag > 1.0)
         //     mag = 1.0;
         // if (mag < -1.0)
         //     mag = -1.0;
         return dir * mag;
-    }else {
+    }
+    else
+    {
         // double mag=(-10000 / (30 + d*d) / max_step);
-        int O=50;
-        double mag=(-O / (O + d*d) );
-        return dir * mag;
+        int O = 50;
+        // double mag = (-O / (O + d * d));
+        double mag = (-O / (O + d));
+        // return dir * mag;
+         return dir * (-10000 / (10 + d) / max_step);
+
     }
 }
 

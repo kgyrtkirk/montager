@@ -130,6 +130,7 @@ class PImage
 	gint32 layer_id;
 	GimpDrawable *drawable;
 	t_polygon local_hull;
+	t_polygon simplified_local_hull;
 	point_xy<int> pos;
 	t_polygon hull;
 	image img;
@@ -174,6 +175,7 @@ private:
 		}
 
 		convex_hull(points, local_hull);
+		boost::geometry::simplify(local_hull, simplified_local_hull, .5);
 
 		// make global hull
 		translate_transformer<double, 2, 2> translate(pos.x(), pos.y());
@@ -199,6 +201,7 @@ public:
 		extract_drawable_infos(other.drawable->drawable_id);
 		img = other.img;
 		local_hull = other.local_hull;
+		simplified_local_hull = other.simplified_local_hull;
 		hull = other.hull;
 		layer_id = other.layer_id;
 	};
@@ -226,6 +229,10 @@ public:
 	const t_polygon &getLocalHull() const
 	{
 		return local_hull;
+	}
+	const t_polygon &getSimplifiedLocalHull() const
+	{
+		return simplified_local_hull;
 	}
 
 	void paint(const point_xy<int> &p)
@@ -485,7 +492,7 @@ public:
 			t_point p(image.getPos().x(), image.getPos().y());
 			// FIXME: this seem to be leaking... :D
 			std::cout << "pos:" << dsv(p) << std::endl;
-			layout.add(new fd_layout::entry(p, image.getLocalHull(), i));
+			layout.add(new fd_layout::entry(p, image.getSimplifiedLocalHull(), i));
 		}
 		layout.run(progress::gimp());
 		// layout.step(100);
