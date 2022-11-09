@@ -487,7 +487,7 @@ public:
 			std::cout << "pos:" << dsv(p) << std::endl;
 			layout.add(new fd_layout::entry(p, image.getLocalHull(), i));
 		}
-		layout.run();
+		layout.run(progress::gimp());
 		// layout.step(100);
 
 		for (auto it = layout.elements.begin(); it != layout.elements.end(); it++)

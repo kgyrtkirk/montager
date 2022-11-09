@@ -85,7 +85,7 @@ test_layout(void *, gconstpointer)
   auto e2 = fd_layout::entry(t_point(0, 0), poly1, 1);
   layout.add(&e1);
 
-  layout.run();
+  layout.run(progress::dummy());
   cout << "pos:" << dsv(e1.position) << endl;
 
   g_assert(-1 < e1.position.x() -50.0 && e1.position.x() -50.0 < 1);
@@ -107,7 +107,7 @@ test_layout2(void *, gconstpointer)
   layout.add(&e1);
   layout.add(&e2);
 
-  layout.run();
+  layout.run(progress::dummy());
   cout << "pos:" << dsv(e1.position) << endl;
 
   // g_assert(-1 < e1.position.x() -100.0 && e1.position.x() -50.0 < 1);

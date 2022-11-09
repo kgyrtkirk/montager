@@ -23,6 +23,7 @@ file(GLOB core_SRC
     "src/render.cpp"
     "src/fd_layout.cpp"
     "src/types.cpp"
+    "src/progress.cpp"
 )
 
 

@@ -1,9 +1,9 @@
 #pragma once
 
 #include "types.h"
+#include "progress.h"
 
 std::vector<t_polygon> guard_polys(int w, int h);
-
 
 namespace montager {
 
@@ -45,7 +45,7 @@ public:
     t_point compute_force(entry*l,entry*r);
     
     void step(double step_size);
-    void run();
+    void run(const progress::progress_handler&progress);
 };
 
 };

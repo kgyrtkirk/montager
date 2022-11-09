@@ -82,16 +82,15 @@ fd_layout::fd_layout(int width, int height)
         add(new entry(t_point(0, 0), *it, -1, true));
     }
 }
-#include <libgimp/gimp.h>
 
-void fd_layout::run()
+void fd_layout::run(const progress::progress_handler&progress)
 {
-    // gimp_progress_set_text("layout");
+    progress.name("layout");
 
     int n = 30;
     for (int i = 0; i < n; i++)
     {
-        // gimp_progress_update(i * 1.0 / n);
+        progress.update(i * 1.0 / n);
         step(max_step * (n - i) / n);
     }
 }
@@ -127,7 +126,17 @@ t_point fd_layout::compute_force(entry *l, entry *r)
     {
         d = .00000000001 * (random() % 1000);
     }
-    return dir * (-10000 / (10 + d) / max_step);
+    if(true) {
+
+        double mag=10*log(d/50.0)/max_step;
+        if (mag > 1.0)
+            mag = 1.0;
+        if (mag < -1.0)
+            mag = -1.0;
+        return dir * mag;
+    }else {
+        return dir * (-10000 / (10 + d) / max_step);
+    }
 }
 
 t_polygon guard(int idx, double w, double h)

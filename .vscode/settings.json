@@ -17,6 +17,7 @@
         "streambuf": "cpp",
         "tuple": "cpp",
         "bitset": "cpp",
-        "ostream": "cpp"
+        "ostream": "cpp",
+        "istream": "cpp"
     }
 }
