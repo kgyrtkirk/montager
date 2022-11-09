@@ -1,8 +1,10 @@
 #include "config.h"
 
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include <gtk/gtk.h>
-
 #include <libgimp/gimp.h>
+#include <libgimp/gimpui.h>
+#pragma GCC diagnostic pop
 
 
 #include "main.h"
@@ -370,7 +372,7 @@ public:
 
 		dist_queue dq;
 
-		for (int i = 0; i < images.size(); i++)
+		for (uint64_t i = 0; i < images.size(); i++)
 		{
 			// FIXME: this seem to be leaking... :D
 			dq.add(new dist_queue::entry(images[i].getHull(), i));
@@ -413,7 +415,7 @@ public:
 	{
 		gimp_progress_set_text("show hulls...");
 		gimp_progress_update(0);
-		for (int i = 0; i < images.size(); i++)
+		for (uint64_t i = 0; i < images.size(); i++)
 		{
 			images[i].show_hull();
 			gimp_progress_update((i + 1) * 1.0 / images.size());
@@ -439,6 +441,7 @@ public:
 			gimp_image_remove_channel(image_id, selection_channel);
 			selection_channel = gimp_selection_save(image_id);
 		}
+
 		gimp_image_select_item(image_id,GIMP_CHANNEL_OP_REPLACE,selection_channel);
 		gimp_item_delete(selection_channel);
 	}

@@ -2,8 +2,10 @@
 
 #include <string.h>
 
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include <libgimp/gimp.h>
 #include <libgimp/gimpui.h>
+#pragma GCC diagnostic pop
 
 #include "main.h"
 #include "interface.h"
@@ -73,6 +75,7 @@ query(void)
   // gchar *help_path;
   // gchar *help_uri;
 
+#pragma GCC diagnostic ignored "-Wwrite-strings"
   static GimpParamDef args[] =
       {
           {GIMP_PDB_INT32, "run_mode", "Interactive, non-interactive"},
@@ -83,15 +86,7 @@ query(void)
           {GIMP_PDB_INT32, "dummy", "dummy3"},
           {GIMP_PDB_INT32, "seed", "Seed value (used only if randomize is FALSE)"},
           {GIMP_PDB_INT32, "randomize", "Use a random seed (TRUE, FALSE)"}};
-
-  // gimp_plugin_domain_register (PLUGIN_NAME, LOCALEDIR);
-
-  // help_path = g_build_filename (DATADIR, "help", NULL);
-  // help_uri = g_filename_to_uri (help_path, NULL, NULL);
-  // g_free (help_path);
-
-  // gimp_plugin_help_register ("http://developer.gimp.org/plug-in-template/help",
-  //                            help_uri);
+#pragma GCC diagnostic pop
 
   gimp_install_procedure(PROCEDURE_SHOW_HULLS,
                          "Shows the convex hulls of the layers",
@@ -248,6 +243,7 @@ run(const gchar *name,
     gimp_displays_flush();
 
   gimp_drawable_detach(drawable);
+
 
   values[0].type = GIMP_PDB_STATUS;
   values[0].data.d_status = status;
