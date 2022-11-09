@@ -6,7 +6,6 @@
 #include <libgimp/gimpui.h>
 #pragma GCC diagnostic pop
 
-
 #include "main.h"
 #include "render.h"
 #include "dist_queue.h"
@@ -62,7 +61,7 @@ public:
 	}
 	guchar *get()
 	{
-		img.get();
+		return img.get();
 	}
 
 	void paint(const point_xy<int> &p, int value)
@@ -136,7 +135,6 @@ class PImage
 	image img;
 
 private:
-
 	void read_image()
 	{
 		gint bpp = drawable->bpp;
@@ -191,7 +189,7 @@ private:
 	}
 
 public:
-	PImage(gint32 _layer_id,gint32 drawable_id) : layer_id(_layer_id)
+	PImage(gint32 _layer_id, gint32 drawable_id) : layer_id(_layer_id)
 	{
 		extract_drawable_infos(drawable_id);
 		read_image();
@@ -213,13 +211,13 @@ public:
 	point_xy<int> getPos() { return pos; }
 	void setPos(const t_point &p)
 	{
-		point_xy<int> new_pos(p.x(),p.y());
-		point_xy<int> off(new_pos.x()-pos.x(),new_pos.y()-pos.y());
+		point_xy<int> new_pos(p.x(), p.y());
+		point_xy<int> off(new_pos.x() - pos.x(), new_pos.y() - pos.y());
 		// gimp_drawable_offset(drawable->drawable_id, false, GimpOffsetType::GIMP_OFFSET_BACKGROUND, off.x(), off.y());
-		
-		pos=new_pos;
+
+		pos = new_pos;
 		// gimp_layer_set_offsets(drawable->drawable_id,pos.x(),pos.y());
-		gimp_layer_set_offsets(layer_id,pos.x(),pos.y());
+		gimp_layer_set_offsets(layer_id, pos.x(), pos.y());
 	}
 	const t_polygon &getHull() const
 	{
@@ -445,7 +443,7 @@ public:
 			selection_channel = gimp_selection_save(image_id);
 		}
 
-		gimp_image_select_item(image_id,GIMP_CHANNEL_OP_REPLACE,selection_channel);
+		gimp_image_select_item(image_id, GIMP_CHANNEL_OP_REPLACE, selection_channel);
 		gimp_item_delete(selection_channel);
 	}
 	void crossfade(gdouble radius)
@@ -485,24 +483,24 @@ public:
 		for (uint64_t i = 0; i < images.size(); i++)
 		{
 			PImage &image = images[i];
-			t_point p(image.getPos().x(),image.getPos().y());
+			t_point p(image.getPos().x(), image.getPos().y());
 			// FIXME: this seem to be leaking... :D
 			std::cout << "pos:" << dsv(p) << std::endl;
 			layout.add(new fd_layout::entry(p, image.getLocalHull(), i));
 		}
 		layout.run();
 		// layout.step(100);
-		
-		for (auto it=layout.elements.begin();it!=layout.elements.end();it++)
+
+		for (auto it = layout.elements.begin(); it != layout.elements.end(); it++)
 		{
-			auto e=*it;
-			if(e->image_idx<0) {
+			auto e = *it;
+			if (e->image_idx < 0)
+			{
 				continue;
 			}
 			auto image = images[e->image_idx];
 			std::cout << "pos:" << dsv(e->position) << std::endl;
 			image.setPos(e->position);
-
 
 			// // gimp_drawable_offset(
 
@@ -512,8 +510,6 @@ public:
 			// // FIXME: this seem to be leaking... :D
 			// layout.add(new fd_layout::entry(p, image.getLocalHull(), i));
 		}
-
-
 	}
 
 	void flush()
