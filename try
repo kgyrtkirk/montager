@@ -5,6 +5,6 @@ mkdir -p build2
 cd build2
 cmake ..
 make
-bin/montager-test
+[ "$1" == "--test" ] && bin/montager-test
 cp bin/montager ~/.config/GIMP/2.10/plug-ins/montager/montager
 [ "$1" == "--live" ] && gimp-2.10 ../trial.xcf

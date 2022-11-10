@@ -17,7 +17,6 @@ public:
 };
 
 
-
 class fd_layout
 {
 public:
@@ -31,8 +30,9 @@ public:
         t_point force;
         int image_idx;
         bool freeze;
+        Positionable*item;
 
-        entry(t_point _pos, t_polygon _g, int _image_idx, Positionable*item, bool _freeze=false);
+        entry(t_point _pos, t_polygon _g, int _image_idx, Positionable*_item, bool _freeze=false);
 
         t_point force_dir(const entry &o) const;
         t_point force_vector(const entry &o) const;
@@ -53,9 +53,9 @@ public:
     {
         elements.push_back(e);
     }
-    t_point compute_force(entry*l,entry*r);
+    t_point compute_force(entry*l,entry*r,double alpha);
     
-    void step(double step_size);
+    void step(double step_size,double alpha);
     void run(const progress::progress_handler&progress);
 };
 

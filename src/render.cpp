@@ -601,6 +601,6 @@ void render(gint32 image_ID, MontageMode mode, PlugInVals *vals)
 
 	free(layers);
 
-	g_message("montager finished %ldms", boost::chrono::duration_cast<boost::chrono::milliseconds>(t2 - t0).count());
+	g_info("montager finished %ldms", boost::chrono::duration_cast<boost::chrono::milliseconds>(t2 - t0).count());
 	gimp_progress_end();
 }

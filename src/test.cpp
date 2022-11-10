@@ -86,9 +86,9 @@ test_layout(void *, gconstpointer)
   layout.add(&e1);
 
   cout << "pos0:" << dsv(e1.position) << endl;
-  layout.step(1);
+  layout.step(1,0);
   cout << "pos1:" << dsv(e1.position) << endl;
-  layout.step(10);
+  layout.step(10,0);
   cout << "pos1:" << dsv(e1.position) << endl;
   layout.run(progress::dummy());
   cout << "pos:" << dsv(e1.position) << endl;

@@ -40,8 +40,13 @@ void fd_layout::entry::reset()
 }
 void fd_layout::entry::commit()
 {
-    if (!freeze)
+    if (!freeze) {
         position = position + force;
+        if(item!=NULL) {
+            t_point2i new_pos(position.x(), position.y());
+            item->setPos(new_pos);
+        }
+    }
     reset();
 }
 void fd_layout::entry::add_force(const t_point &f)
@@ -73,7 +78,7 @@ t_point fd_layout::entry::absolute_center() const
 
 fd_layout::fd_layout(int width, int height)
 {
-    max_step = max(width, height) / 10;
+    max_step = max(width, height) / 25;
     auto guards = guard_polys(width, height);
     for (auto it = guards.begin(); it != guards.end(); it++)
     {
@@ -96,12 +101,14 @@ void fd_layout::run(const progress::progress_handler &progress)
         size = pow(size, 2);
         // if(i<n/2)size=.5;
         // else size=.01;
-        step(max_step * size);
+        double alpha=(double)(i+1)/n;
+        step(max_step * size,alpha);
     }
 }
 
-void fd_layout::step(double step_size)
+void fd_layout::step(double step_size,double alpha)
 {
+    // double step_size=max_step*(1.1-alpha);
     for (auto it = elements.begin(); it != elements.end(); it++)
     {
         (*it)->reset();
@@ -111,7 +118,7 @@ void fd_layout::step(double step_size)
     {
         for (uint64_t j = i + 1; j < elements.size(); j++)
         {
-            t_point f = compute_force(elements[i], elements[j]);
+            t_point f = compute_force(elements[i], elements[j],alpha);
             f = f * step_size;
             elements[i]->add_force(f);
             elements[j]->add_force(f * -1.0);
@@ -123,7 +130,7 @@ void fd_layout::step(double step_size)
     }
 }
 
-t_point fd_layout::compute_force(entry *l, entry *r)
+t_point fd_layout::compute_force(entry *l, entry *r,double alpha)
 {
     double d = l->distance1(*r);
     auto dir = l->force_dir(*r);
@@ -145,7 +152,7 @@ t_point fd_layout::compute_force(entry *l, entry *r)
         // double mag=(-10000 / (30 + d*d) / max_step);
         int O = 50;
         // double mag = (-O / (O + d * d));
-        double mag = (-O / (O + pow(d, 1)));
+        double mag = (-O / (O + pow(d, 2-alpha)));
         // return dir * mag;
         double s =
             (l->freeze || r->freeze) ? pow(elements.size(), .25) : 1;
